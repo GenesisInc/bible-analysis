@@ -4,6 +4,7 @@ import argparse
 import json
 
 from core.processing import entity_extractor, bible_search
+from core.travel import mapper
 
 # from core.translation_loader import bible_gw_loader, jw_loader, translation_manager
 from core.translation_loader import translation_manager
@@ -20,8 +21,29 @@ def setup_parsers():
     setup_search_parser(subparsers)
     setup_extract_reference_parser(subparsers)
     setup_extract_translation_parser(subparsers)
+    setup_travel_parser(subparsers)
 
     return parser
+
+
+def setup_travel_parser(subparsers):
+    """setup extract-reference parser"""
+    reference_parser = subparsers.add_parser(
+        "travel-viewer",
+        help="view travels",
+    )
+    reference_parser.add_argument(
+        "--input-file",
+        type=str,
+        default="data/travels.csv",
+        help="vivew travel map (default: %(default)s).",
+    )
+    reference_parser.add_argument(
+        "--output-file",
+        type=str,
+        default="data/travel-maps.csv",
+        help="vivew travel map (default: %(default)s).",
+    )
 
 
 def setup_extract_entities_parser(subparsers):
@@ -177,6 +199,8 @@ def handle_command(args):
             args.input_file, args.reference, args.translation
         )
         print(result)
+    elif args.command == "travel-viewer":
+        mapper.map_travel()
     elif args.command == "extract-translation":
         with open(args.input_file, "r", encoding="utf-8") as f:
             multi_translation_data = json.load(f)
