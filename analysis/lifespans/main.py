@@ -88,7 +88,7 @@ def traverse_bible_text(base_path):
                         yield book, chapter, file.read().strip()
 
 
-def extract_entities_from_verse(verse_text, verse_num, entities, book, chapter):
+def tag_entities_from_verse(verse_text, verse_num, entities, book, chapter):
     """Extracts entities from verse text and updates the entities dictionary."""
     doc = nlp(verse_text)
     reference = get_reference(book, chapter, verse_num)
@@ -125,7 +125,7 @@ def process_large_text(text, book, chapter, results):
 
         for i, (start_idx, verse_num) in enumerate(verse_boundaries[:-1]):
             verse_text = line[start_idx : verse_boundaries[i + 1][0]].strip()
-            extract_entities_from_verse(verse_text, verse_num, entities, book, chapter)
+            tag_entities_from_verse(verse_text, verse_num, entities, book, chapter)
 
     results.setdefault(book, {})[chapter] = entities
 

@@ -92,8 +92,8 @@ occupation_keywords = {
 }
 
 
-def extract_entities_from_verse(verse_text):
-    """Extract named entities using spaCy."""
+def tag_entities_from_verse(verse_text):
+    """Tag named entities using spaCy."""
     doc = nlp(verse_text)
     return {
         "PERSON": [ent.text for ent in doc.ents if ent.label_ == "PERSON"],
