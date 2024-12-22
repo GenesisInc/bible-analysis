@@ -3,7 +3,7 @@
 import argparse
 import json
 
-from core.processing import entity_extractor, bible_search
+from core.nlp_tagger import tagger, bible_search
 from core.travel import mapper
 
 from core.translation_loader import translation_manager
@@ -231,7 +231,7 @@ def setup_extract_translation_parser(subparsers):
 def handle_command(args):
     """Handle the parsed command."""
     if args.command == "extract-entities":
-        entity_extractor.perform_entity_analysis(
+        tagger.perform_entity_analysis(
             args.input_file,
             args.output_json,
             args.output_csv,
@@ -252,7 +252,7 @@ def handle_command(args):
                     f"{match['book']} {match['chapter']}:{match['verse']} - {match['text']}"
                 )
     elif args.command == "extract-reference":
-        result = entity_extractor.extract_reference(
+        result = tagger.extract_reference(
             args.input_file, args.reference, args.translation
         )
         print(result)

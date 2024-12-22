@@ -5,7 +5,7 @@ import unittest
 import spacy
 
 from main import extract_context  # Replace with your actual script name
-from main import extract_entities_from_verse
+from main import tag_entities_from_verse
 
 # Load spaCy's English NLP model for testing
 nlp = spacy.load("en_core_web_sm")
@@ -51,7 +51,7 @@ class TestMain(unittest.TestCase):
         entities = {"PERSON": {}}
         book = "01-Genesis"
         chapter = "010"
-        extract_entities_from_verse(verse_text, verse_num, entities, book, chapter)
+        tag_entities_from_verse(verse_text, verse_num, entities, book, chapter)
 
         # Expected output in entities dict
         expected_output = {

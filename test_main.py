@@ -2,7 +2,7 @@
 
 import pytest
 
-from core.processing.entity_extractor import extract_reference, parse_reference
+from core.nlp_tagger.tagger import extract_reference, parse_reference
 
 
 def test_parse_reference_valid_cases():
