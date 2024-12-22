@@ -1,0 +1,10 @@
+digraph BiblicalJourneys {
+    rankdir = LR;
+    node [shape = circle;];
+    
+    "Ur of the Chaldeans" -> "Haran" [label = "1500 km";];
+    "Haran" -> "Canaan" [label = "600 km";];
+    "Egypt" -> "Mount Sinai" [label = "250 km";];
+    "Nazareth" -> "Bethlehem" [label = "130 km";];
+    "Joppa" -> "Nineveh" [label = "800 km";];
+}

@@ -174,8 +174,10 @@ tasks:
           --books john \
           --translation "{{.translation}}"
 
-  extract:
-    desc: extract entities from {{.bible_data_json}} and write to 2 output files
+  nlp-tag:
+    aliases:
+      - tag
+    desc: tag entities in a translation into 2 output files        ... task nlp-tag -- nwt
     cmds:
       - |
         if [[ ! -f "{{.TMP_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json" ]]; then
@@ -188,27 +190,6 @@ tasks:
           --output-json "{{.TMP_DIR}}/{{.CLI_ARGS| default .translation}}_entities.json" \
           --output-csv "{{.TMP_DIR}}/{{.CLI_ARGS| default .translation}}_entities.csv" \
           --translation "{{.CLI_ARGS| default .translation}}"
-
-  load-gateway:
-    cmds:
-      - |
-        uv run python3 main.py load-gateway \
-          --input-dir data/bibles/bible_gateway \
-          --output-dir {{.TMP_DIR}}
-
-  load-jworg:
-    cmds:
-      - |
-        uv run python3 main.py \
-          load-jworg \
-          --input-dir  data/bibles/jw_org/nwt/english/2013-release \
-          --output-file {{.TMP_DIR}}/nwt_bible.json
-
-  load-bibles:
-    cmds:
-      - task: load-gateway
-      - task: load-jworg
-      - task: merge-nwt
 
   convert_2_csv:
     silent: true
@@ -274,65 +255,10 @@ tasks:
           --input-file {{.TMP_DIR}}/multi_translation.json \
           --output-file {{.TMP_DIR}}/nwt_bible.json
 
-  merge-nwt:
-    silent: true
-    cmds:
-      - |
-        uv run python3 main.py \
-          merge-translation \
-          --input-file {{.TMP_DIR}}/nwt_bible.json \
-          --output-file {{.TMP_DIR}}/multi_translation.json \
-          --translation nwt
-
-  dl-bibles-asv:
-    silent: true
-    vars:
-      VERSIONS: ASV
-    cmds:
-      - |
-        # set -x
-        downloaded_now=0
-        downloaded_already=0
-
-        echo "{{.VERSIONS}}" | tr ',' '\n' | while IFS= read -r version; do
-          echo "{{.BOOKS}}" | while IFS= read -r book; do
-            # Skip empty lines
-            [ -z "$book" ] && continue
-            encoded_book=$(echo "$book" | sed 's/ /%20/g') # Encode spaces in book names
-            mkdir -p "bibles/${version}/${book}"
-
-            # Fetch the total number of chapters for the book
-            total_chapters=$(echo "{{.CHAPTERS}}" | grep -E "^${book}:" | cut -d':' -f2)
-            if [ -z "$total_chapters" ]; then
-              echo "$(date +'%Y-%m-%d %H:%M:%S') Error: No chapter count found for ${book}. Skipping."
-              continue
-            fi
-
-            for ch in $(seq 1 "$total_chapters"); do
-              printf "\n$(date +'%Y-%m-%d %H:%M:%S') Downloaded: ${downloaded_now}, processing ${book}, Chapter ${ch}, Version ${version}..."
-              if [[ ! -f "bibles/${version}/${book}/${ch}.html" ]]; then
-                printf " | downloading now ..."
-                downloaded_now=$((downloaded_now+1))
-                curl -k -s -o "bibles/${version}/${book}/${ch}.html" -w "%{http_code}" \
-                  "https://www.biblegateway.com/passage/?search=${encoded_book}%20${ch}&version=${version}&interface=print" > /dev/null
-              else
-                downloaded_already=$((downloaded_already+1))
-                printf " | already downloaded ..."
-                # echo "$(date +'%Y-%m-%d %H:%M:%S') Already downloaded: ${downloaded_already}, bibles/${version}/${book}/${ch}.html"
-                # continue
-              fi
-
-              # Validate content
-              if ! grep -q "passage-content" "bibles/${version}/${book}/${ch}.html"; then
-                echo "$(date +'%Y-%m-%d %H:%M:%S') Stopping ${book} at Chapter ${ch} for Version ${version} (invalid content)."
-                break
-              fi
-
-              grep -A1 "passage-content passage-class-0" "bibles/${version}/${book}/${ch}.html" > "bibles/${version}/${book}/${ch}.txt"
-              printf " | total downloaded: $((downloaded_now+downloaded_already))"
-            done
-          done
-        done
+        # extract ojb
+        uv run python3 main.py extract-translation --translation "ojb" \
+          --input-file {{.TMP_DIR}}/multi_translation.json \
+          --output-file {{.TMP_DIR}}/ojb_bible.json
 
   verify-extracted-json:
     cmds:
@@ -363,75 +289,6 @@ tasks:
         printf "find null entries:"
         jq 'to_entries | map(select(.value | to_entries | map(select(.value | to_entries | map(select(.value == null or .value == [])) | length > 0)) | length > 0))' {{.TMP_DIR}}/multi_translation.json
 
-  quick-analysis:
-    silent: true
-    cmds:
-      - |
-        for t in KJ21 ASV ; do
-          echo "translation: ${t}"
-          echo "files smaller than 1000 bytes:"
-          fd -HI . data/bibles/bibles_gateway/${t} --size=-1000b -x ls -al
-          printf "total txt files: "
-          fd -HI . data/bibles/bibles_gateway/${t} -e txt | wc -l
-          printf "total html files: "
-          fd -HI . data/bibles/bibles_gateway/${t} -e html | wc -l
-          echo
-        done
-
-  dl-bibles:
-    cmds:
-      - task: dl-bibles-asv
-      - task: dl-bibles-kj21
-
-  dl-bibles-kj21:
-    silent: true
-    vars:
-      VERSIONS: KJ21
-    cmds:
-      - |
-        # set -x
-        downloaded_now=0
-        downloaded_already=0
-
-        echo "{{.VERSIONS}}" | tr ',' '\n' | while IFS= read -r version; do
-          echo "{{.BOOKS}}" | while IFS= read -r book; do
-            # Skip empty lines
-            [ -z "$book" ] && continue
-            encoded_book=$(echo "$book" | sed 's/ /%20/g') # Encode spaces in book names
-            mkdir -p "bibles/${version}/${book}"
-
-            # Fetch the total number of chapters for the book
-            total_chapters=$(echo "{{.CHAPTERS}}" | grep -E "^${book}:" | cut -d':' -f2)
-            if [ -z "$total_chapters" ]; then
-              echo "$(date +'%Y-%m-%d %H:%M:%S') Error: No chapter count found for ${book}. Skipping."
-              continue
-            fi
-
-            for ch in $(seq 1 "$total_chapters"); do
-              printf "\n$(date +'%Y-%m-%d %H:%M:%S') Downloaded: ${downloaded_now}, processing ${book}, Chapter ${ch}, Version ${version}..."
-              if [[ ! -f "bibles/${version}/${book}/${ch}.html" ]]; then
-                printf " | downloading now ..."
-                downloaded_now=$((downloaded_now+1))
-                curl -k -s -o "bibles/${version}/${book}/${ch}.html" -w "%{http_code}" \
-                  "https://www.biblegateway.com/passage/?search=${encoded_book}%20${ch}&version=${version}&interface=print" > /dev/null
-              else
-                downloaded_already=$((downloaded_already+1))
-                printf " | already downloaded ..."
-                # continue
-              fi
-
-              # Validate content
-              if ! grep -q "passage-content" "bibles/${version}/${book}/${ch}.html"; then
-                echo "$(date +'%Y-%m-%d %H:%M:%S') Stopping ${book} at Chapter ${ch} for Version ${version} (invalid content)."
-                break
-              fi
-
-              grep -A1 "passage-content passage-class-0" "bibles/${version}/${book}/${ch}.html" > "bibles/${version}/${book}/${ch}.txt"
-              printf " | total downloaded: $((downloaded_now+downloaded_already))"
-            done
-          done
-        done
-
   uv-sync:
     cmds:
       - |
@@ -440,7 +297,7 @@ tasks:
 
   ref:
     silent: true
-    desc: "extract bible text - example: task ref -- genesis 1:1-1:4"
+    desc: refs from one or more transalations                      ... task ref -- genesis 1:1-1:4 __OR__ task translation=ojb ref -- genesis 1:1-4
     cmds:
       - |
         printf "%-5s: " {{.translation}}
@@ -451,7 +308,7 @@ tasks:
 
   ref-all:
     silent: true
-    desc: "extract bible text - example: task ref -- genesis 1:1-1:4"
+    desc: refs from one or more transalations                      ... task ref -- genesis 1:1-1:4
     cmds:
       - for: { var: translations }
         cmd: |
@@ -461,9 +318,22 @@ tasks:
             --translation {{.ITEM}} \
             --reference "{{.CLI_ARGS}}"
 
+  ref-multi:
+    silent: true
+    desc: refs from one or more transalations                      ... task ref-multi -- genesis 1.1
+    cmds:
+      - |
+        BOOK=$(echo "{{.CLI_ARGS}}" | awk '{print tolower($1)}')    # Extract book name (e.g., genesis)
+        CHAPTER=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d'.' -f1)  # Extract chapter
+        VERSE=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d'.' -f2)    # Extract verse
+
+        # Use jq to extract the specific reference
+        jq -r --arg book "$BOOK" --arg chapter "$CHAPTER" --arg verse "$VERSE" \
+          '.[$book][$chapter][$verse]' data/tmp/multi_translation.json
+
   search:
     # silent: true
-    desc: "find top 5 matches for a string/phrase | examples: (1) task search -- from (2) task search -- 'from of'"
+    desc: find top 5 matches for a string/phrase                   ... task search -- Jesus __OR__ task translation=ojb search -- 'word of god'
     cmds:
       - |
         uv run python3 main.py search --phrase {{.CLI_ARGS}} \
@@ -472,8 +342,9 @@ tasks:
           --translation {{.translation}} \
         | mlr --c2p --barred cat
 
-  counts:
+  compare-translations:
     silent: true
+    desc: compare number of verse, chapters & books count against transalations
     cmds:
       - echo > tmp/status-out.csv
       - for: { var: translations }
@@ -488,7 +359,7 @@ tasks:
       - mlr --j2p --barred cat tmp/status-out.csv
 
   legends:
-    desc: legend summary
+    desc: legend summary                                           ... task legend
     silent: true
     cmds:
       - |
@@ -506,8 +377,20 @@ tasks:
           ' \
           then reorder -f Type,count,Explanation
 
+  trips:
+    desc: view journesy in map                                    ... task travels
+    cmds:
+      - |
+        uv run main.py trips
+
+  science:
+    desc: scientific matters                                      ... task science
+    cmds:
+      - |
+        uv run main.py science
+
   org:
-    desc: show Organizations or groups
+    desc: show Organizations or groups                             ... task translation=ojb org
     silent: true
     cmds:
       - |
@@ -517,7 +400,7 @@ tasks:
 
   occupation:
     silent: true
-    desc: show roles or professions"
+    desc: show roles or professions
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} filter '$Type == "OCCUPATION"'  > {{.out}}
@@ -525,7 +408,7 @@ tasks:
 
   unique-occupation:
     silent: true
-    desc: show roles or professions"
+    desc: show roles or professions
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} \
@@ -536,7 +419,7 @@ tasks:
 
   top-occupations:
     silent: true
-    desc: show roles or professions"
+    desc: show roles or professions
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} \
@@ -546,7 +429,7 @@ tasks:
       - task: out
 
   occupation-summary:
-    desc: show summary of roles or professions"
+    desc: show summary of roles or professions                     ... task translation=ojb occupation-summary
     silent: true
     cmds:
       - |
@@ -602,7 +485,7 @@ tasks:
 
   names:
     silent: true
-    desc: "show names/persons"
+    desc: show names/persons                                       ... task translation=ojb names
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} \
