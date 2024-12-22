@@ -377,11 +377,17 @@ tasks:
           ' \
           then reorder -f Type,count,Explanation
 
-  travels:
+  trips:
     desc: view journesy in map                                    ... task travels
     cmds:
       - |
-        uv run main.py travel-viewer
+        uv run main.py trips
+
+  science:
+    desc: scientific matters                                      ... task science
+    cmds:
+      - |
+        uv run main.py science
 
   org:
     desc: show Organizations or groups                             ... task translation=ojb org

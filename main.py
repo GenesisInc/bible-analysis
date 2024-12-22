@@ -6,8 +6,10 @@ import json
 from core.processing import entity_extractor, bible_search
 from core.travel import mapper
 
-# from core.translation_loader import bible_gw_loader, jw_loader, translation_manager
 from core.translation_loader import translation_manager
+
+from core.science import facts
+from core.visualization import visualization
 
 
 def setup_parsers():
@@ -22,14 +24,69 @@ def setup_parsers():
     setup_extract_reference_parser(subparsers)
     setup_extract_translation_parser(subparsers)
     setup_travel_parser(subparsers)
+    setup_timeline_parser(subparsers)  # Added timeline parser
 
     return parser
+
+
+def setup_timeline_parser(subparsers):
+    """Set up timeline parser for generating charts."""
+    timeline_parser = subparsers.add_parser(
+        "science",
+        help="Generate and visualize timeline charts for scientific and biblical events.",
+    )
+    timeline_parser.add_argument(
+        "--input-file",
+        type=str,
+        default="core/science/science_data.py",
+        help="Input CSV file for timeline data (default: %(default)s).",
+    )
+    timeline_parser.add_argument(
+        "--add-event",
+        action="store_true",
+        help="Add a new event to the timeline data.",
+    )
+    timeline_parser.add_argument(
+        "--item",
+        type=str,
+        help="Name of the event (e.g., 'The Expanding Universe').",
+    )
+    timeline_parser.add_argument(
+        "--category",
+        type=str,
+        help="Category of the event (e.g., 'Cosmology').",
+    )
+    timeline_parser.add_argument(
+        "--bible-reference",
+        type=str,
+        help="Bible reference associated with the event (e.g., 'Isaiah 40:22').",
+    )
+    timeline_parser.add_argument(
+        "--recorded-timeframe",
+        type=int,
+        help="Timeframe when the event was recorded (e.g., -700).",
+    )
+    timeline_parser.add_argument(
+        "--scientific-comment-year",
+        type=int,
+        help="Year when scientists commented on the event (e.g., 1929).",
+    )
+    timeline_parser.add_argument(
+        "--confirmed",
+        type=bool,
+        help="Whether the detail is confirmed by scientists (True/False).",
+    )
+    timeline_parser.add_argument(
+        "--scientific-commentary",
+        type=str,
+        help="Details of the scientific commentary.",
+    )
 
 
 def setup_travel_parser(subparsers):
     """setup extract-reference parser"""
     reference_parser = subparsers.add_parser(
-        "travel-viewer",
+        "trips",
         help="view travels",
     )
     reference_parser.add_argument(
@@ -199,7 +256,7 @@ def handle_command(args):
             args.input_file, args.reference, args.translation
         )
         print(result)
-    elif args.command == "travel-viewer":
+    elif args.command == "trips":
         mapper.map_travel()
     elif args.command == "extract-translation":
         with open(args.input_file, "r", encoding="utf-8") as f:
@@ -213,6 +270,27 @@ def handle_command(args):
             json.dump(single_translation_data, f, indent=4)
 
         print(f"Extracted {args.translation} translation saved to {args.output_file}")
+    elif args.command == "science":
+        # Handle timeline generation and adding events
+        events = facts.facts
+        if args.add_event:
+            new_event = {
+                "Item": args.item,
+                "Category": args.category,
+                "Bible Reference": args.bible_reference,
+                "Recorded Timeframe": args.recorded_timeframe,
+                "Detail Confirmed by Scientists": args.confirmed,
+                "Scientific Commentary": args.scientific_commentary,
+                "Scientific Comment Year": args.scientific_comment_year,
+                "Timeframe Difference": args.scientific_comment_year
+                - visualization.parse_year(args.recorded_timeframe),
+            }
+            events.append(new_event)
+            with open(args.input_file, "w", encoding="utf-8") as file:
+                json.dump(events, file, indent=4)
+            print(f"Added event: {new_event}")
+        else:
+            visualization.generate_mermaid_charts(events)
     else:
         print("Invalid command. Use --help for available options.")
 

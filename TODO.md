@@ -43,4 +43,10 @@ Track below items as well
 39. strength (men, warriors, david, goliad)
 40. tall/short/fat persons (goliad, sakeus, some king)
 41. transportation (chariots, horses, camels)
-42. 
+42. animals
+43. tricks (laben trick jacob - giving leah in place of rachel)
+44. covenants / sworn ( pile of stones, eating)
+45. twins
+46. large/small gatherings - for wars, parties, marriages, spiritual talks
+47. angels in human forms
+48. 

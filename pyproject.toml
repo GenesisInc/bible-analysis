@@ -12,4 +12,5 @@ dependencies = [
     "bs4>=0.0.2",
     "regex>=2024.11.6",
     "folium>=0.19.2",
+    "matplotlib>=3.10.0",
 ]
