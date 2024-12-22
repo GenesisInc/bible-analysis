@@ -15,6 +15,7 @@ def map_travel():
     generate_enhanced_biblical_map_with_routes(
         journey_data.biblical_travel_data, updated_map_file_path
     )
+    print(f"generated trips map with {len(journey_data.biblical_travel_data)} points")
     open_map(updated_map_file_path)
 
 
