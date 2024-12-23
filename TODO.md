@@ -49,6 +49,10 @@ Track below items as well
 45. [ ] twins
 46. [ ] large/small gatherings - for wars, parties, marriages, spiritual talks
 47. [ ] angels in human forms
+48. [ ] commandments with the timeframe introduced
+49. [ ] happy occations
+50. [ ] celebrations, dates and beliefs
+51. [ ] 
 
 [10]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/science-facts
 [2]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/travel-with-map
