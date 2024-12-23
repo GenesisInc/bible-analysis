@@ -12,12 +12,40 @@ Here are few things you need to remember:
 - Expected accuracy is about 50-60%
 - Most of the reports are based on NWT 2013-English bible
 
+## graph flow
+<!-- markdownlint-disable MD001 MD046 -->
+
+```mermaid
+mindmap
+    root((GenesisInc))
+        1.Bible-text
+            a.Go-task download bible html fragments
+            ::icon(fa fa-book)
+            b.Writes .txt/.html to local filestore
+            c.Py reads txt/html and extract text
+            d.make structured bible.json
+            e.write JSON, CSV docs to local filestore
+        2.Bible-analysis
+            a.Read JSON, CSV docs from local filestore
+            b.Tag entities with NLP-spaCy
+            c.Write tagged entites to CSV (local filestore)
+            d.Run tests with go-tasks using below
+                task ref
+                task names
+                task date
+        3.Bible-api
+            a.Reads tagged enties from local filestore
+            b.Import Data to PSQL
+            c.Serve content over an api
+```
+
 ## requirements
 
 - [go-task/task](https://github.com/go-task/task)
 - [astral-sh/uv](https://github.com/astral-sh/uv)
-- [jqlang/jq](https://github.com/jqlang/jq)
 - [miller](https://github.com/johnkerl/miller)
+- [jqlang/jq](https://github.com/jqlang/jq) (optional)
+- [py-nlp-spacy-uv](./README.nlp_helper.md)
 - only for developers - [developer setup](./docs/README.nlp_helper.md)
 
 ## initial setup
@@ -455,14 +483,6 @@ then, you may run below commands to see the data.
 
         ❯ task ref -- 2 john 1:2
             because of the truth that remains in us and will be with us forever.
-
-## requirements
-
-- [go-task/task](https://github.com/go-task/task)
-- [astral-sh/uv](https://github.com/astral-sh/uv)
-- [miller](https://github.com/johnkerl/miller)
-- [jqlang/jq](https://github.com/jqlang/jq) (optional)
-- [py-nlp-spacy-uv](./README.nlp_helper.md)
 
 ## one-time tasks
 
