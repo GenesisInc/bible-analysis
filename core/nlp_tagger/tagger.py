@@ -92,16 +92,17 @@ occupation_keywords = {
 }
 
 
-def tag_entities_from_verse(verse_text):
-    """Tag named entities using spaCy."""
-    doc = nlp(verse_text)
-    return {
-        "PERSON": [ent.text for ent in doc.ents if ent.label_ == "PERSON"],
-        "DATE": [ent.text for ent in doc.ents if ent.label_ == "DATE"],
-        "GPE": [ent.text for ent in doc.ents if ent.label_ == "GPE"],
-    }
+# def tag_entities_from_verse(verse_text):
+#     """Tag named entities using spaCy."""
+#     doc = nlp(verse_text)
+#     return {
+#         "PERSON": [ent.text for ent in doc.ents if ent.label_ == "PERSON"],
+#         "DATE": [ent.text for ent in doc.ents if ent.label_ == "DATE"],
+#         "GPE": [ent.text for ent in doc.ents if ent.label_ == "GPE"],
+#     }
 
 
+# called by main.py->Cmd.extract_reference
 def extract_reference(bible_json_path, reference, translation):
     """Extracts text for a given Bible reference."""
     with open(bible_json_path, "r", encoding="utf-8") as file:
@@ -236,7 +237,7 @@ def load_bible_json(file_path):
         return json.load(json_file)
 
 
-def chapter_entities_analysis(chapter_data):
+def tag_chapter_entities(chapter_data):
     """Extracts entities and occupations for all verses in a chapter."""
     chapter_entities = {
         verse_num: {
@@ -277,7 +278,7 @@ def process_chapter(args):
     return (
         book,
         chapter_num,
-        chapter_entities_analysis(chapter_data),
+        tag_chapter_entities(chapter_data),
     )
 
 

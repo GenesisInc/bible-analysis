@@ -1,6 +1,7 @@
 """extract few entities from bible"""
 
-import argparse
+# bible-analysis/core/analysis_tools.py
+
 import csv
 import json
 import os
@@ -47,29 +48,6 @@ def normalize_unicode(text):
     return text
 
 
-def extract_context(text, start, end):
-    """Extracts context around an entity, retaining possessives and
-    handling contractions correctly."""
-    # Tokenize using spaCy to retain possessives
-    doc = nlp(text)
-    words = [token.text for token in doc]
-
-    # If possessive "'s" precedes the entity, adjust start to include it
-    if start > 0 and words[start - 1] == "'s":
-        start -= 1  # Include possessive "'s" in context
-
-    # Capture 3 words before and after the entity for full context
-    entity_words = words[start:end]
-    before = " ".join(words[max(0, start - 3) : start])
-    after = " ".join(words[end : end + 3])
-
-    # Join context and ensure spaces are clean
-    context = f"{before} {' '.join(entity_words)} {after}".strip()
-    context = re.sub(r"\s{2,}", " ", context)  # Collapse extra spaces
-
-    return context
-
-
 def get_reference(book, chapter, verse_num):
     """Generates a verse reference in 'Book Chapter:Verse' format."""
     book_name = book.split("-")[1]
@@ -86,48 +64,6 @@ def traverse_bible_text(base_path):
                 if os.path.isfile(chapter_path):
                     with open(chapter_path, "r", encoding="utf-8") as file:
                         yield book, chapter, file.read().strip()
-
-
-def tag_entities_from_verse(verse_text, verse_num, entities, book, chapter):
-    """Extracts entities from verse text and updates the entities dictionary."""
-    doc = nlp(verse_text)
-    reference = get_reference(book, chapter, verse_num)
-
-    for ent in doc.ents:
-        if ent.label_ in entities:
-            entity_name = normalize_unicode(ent.text)
-            entity_data = entities[ent.label_].setdefault(
-                entity_name, {"Count": 0, "Context": []}
-            )
-            entity_data["Count"] += 1
-
-            # Generate context and normalize for final output
-            context_text = extract_context(verse_text, ent.start, ent.end)
-            entity_data["Context"].append(
-                {
-                    "Reference": reference,
-                    "Text": normalize_unicode(context_text),
-                }
-            )
-
-
-def process_large_text(text, book, chapter, results):
-    """Processes a larger text block to extract entities with context."""
-    entities = {"PERSON": {}, "GPE": {}, "TIME": {}, "LAW": {}, "EVENT": {}}
-    lines = text.splitlines()
-    verse_pattern = r"(\d+)\u00A0"
-
-    for line in lines:
-        verse_boundaries = [
-            (m.start(), m.group(1)) for m in re.finditer(verse_pattern, line)
-        ]
-        verse_boundaries.append((len(line), None))
-
-        for i, (start_idx, verse_num) in enumerate(verse_boundaries[:-1]):
-            verse_text = line[start_idx : verse_boundaries[i + 1][0]].strip()
-            tag_entities_from_verse(verse_text, verse_num, entities, book, chapter)
-
-    results.setdefault(book, {})[chapter] = entities
 
 
 def detect_lifespan_phrases(chapter_text, book="Genesis", chapter="16"):
@@ -175,6 +111,16 @@ def detect_lifespan_phrases(chapter_text, book="Genesis", chapter="16"):
     return lifespans_dict
 
 
+def process_lifespan(base_path):
+    """Process lifespan statements and save results."""
+    lifespans = {}
+    for book, chapter, text in traverse_bible_text(base_path):
+        chapter_lifespans = detect_lifespan_phrases(text, book, chapter)
+        if chapter_lifespans:
+            lifespans.setdefault(book, {})[chapter] = chapter_lifespans
+    save_results(lifespans, "lifespans")
+
+
 def calculate_confidence(sentence_text):
     """Calculates confidence based on lifespan indicators and exclusion keywords."""
     indicator_matches = sum(
@@ -192,24 +138,6 @@ def extract_numeric_value(verse_text):
     """Extracts a numeric value from verse_text if it’s purely numeric."""
     numeric_text = re.sub(r"[^\d]", "", verse_text)
     return int(numeric_text) if numeric_text.isdigit() else None
-
-
-def process_entities(base_path):
-    """Process entities and save results."""
-    results = {}
-    for book, chapter, text in traverse_bible_text(base_path):
-        process_large_text(text, book, chapter, results)
-    save_results(results, "entities")
-
-
-def process_lifespan(base_path):
-    """Process lifespan statements and save results."""
-    lifespans = {}
-    for book, chapter, text in traverse_bible_text(base_path):
-        chapter_lifespans = detect_lifespan_phrases(text, book, chapter)
-        if chapter_lifespans:
-            lifespans.setdefault(book, {})[chapter] = chapter_lifespans
-    save_results(lifespans, "lifespans")
 
 
 def save_results(data, data_type):
@@ -252,28 +180,76 @@ def save_results(data, data_type):
                                 )
 
 
-def main():
-    """Main function with CLI options for entity tagging or lifespan extraction."""
-    parser = argparse.ArgumentParser(
-        description="Process Bible text for entity tagging or lifespan extraction."
-    )
-    parser.add_argument(
-        "--tag-entities", action="store_true", help="Run entity tagging on Bible text."
-    )
-    parser.add_argument(
-        "--extract-lifespan",
-        action="store_true",
-        help="Run lifespan extraction on Bible text.",
-    )
-    args = parser.parse_args()
+# called by test_main.py->TestFunctions
+def extract_context(text, start, end):
+    """Extracts context around an entity, retaining possessives and
+    handling contractions correctly."""
+    # Tokenize using spaCy to retain possessives
+    doc = nlp(text)
+    words = [token.text for token in doc]
 
-    if args.tag_entities:
-        process_entities(BASE_PATH)
-    elif args.extract_lifespan:
-        process_lifespan(BASE_PATH)
-    else:
-        print("Please specify an action with --tag-entities or --extract-lifespan")
+    # If possessive "'s" precedes the entity, adjust start to include it
+    if start > 0 and words[start - 1] == "'s":
+        start -= 1  # Include possessive "'s" in context
+
+    # Capture 3 words before and after the entity for full context
+    entity_words = words[start:end]
+    before = " ".join(words[max(0, start - 3) : start])
+    after = " ".join(words[end : end + 3])
+
+    # Join context and ensure spaces are clean
+    context = f"{before} {' '.join(entity_words)} {after}".strip()
+    context = re.sub(r"\s{2,}", " ", context)  # Collapse extra spaces
+
+    return context
 
 
-if __name__ == "__main__":
-    main()
+# called by test_main.py->TestFunctions
+def tag_entities_from_verse(verse_text, verse_num, entities, book, chapter):
+    """Extracts entities from verse text and updates the entities dictionary."""
+    doc = nlp(verse_text)
+    reference = get_reference(book, chapter, verse_num)
+
+    for ent in doc.ents:
+        if ent.label_ in entities:
+            entity_name = normalize_unicode(ent.text)
+            entity_data = entities[ent.label_].setdefault(
+                entity_name, {"Count": 0, "Context": []}
+            )
+            entity_data["Count"] += 1
+
+            # Generate context and normalize for final output
+            context_text = extract_context(verse_text, ent.start, ent.end)
+            entity_data["Context"].append(
+                {
+                    "Reference": reference,
+                    "Text": normalize_unicode(context_text),
+                }
+            )
+
+
+def process_large_text(text, book, chapter, results):
+    """Processes a larger text block to extract entities with context."""
+    entities = {"PERSON": {}, "GPE": {}, "TIME": {}, "LAW": {}, "EVENT": {}}
+    lines = text.splitlines()
+    verse_pattern = r"(\d+)\u00A0"
+
+    for line in lines:
+        verse_boundaries = [
+            (m.start(), m.group(1)) for m in re.finditer(verse_pattern, line)
+        ]
+        verse_boundaries.append((len(line), None))
+
+        for i, (start_idx, verse_num) in enumerate(verse_boundaries[:-1]):
+            verse_text = line[start_idx : verse_boundaries[i + 1][0]].strip()
+            tag_entities_from_verse(verse_text, verse_num, entities, book, chapter)
+
+    results.setdefault(book, {})[chapter] = entities
+
+
+def process_entities(base_path):
+    """Process entities and save results."""
+    results = {}
+    for book, chapter, text in traverse_bible_text(base_path):
+        process_large_text(text, book, chapter, results)
+    save_results(results, "entities")
