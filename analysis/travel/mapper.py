@@ -7,10 +7,14 @@ import folium
 from folium import FeatureGroup, LayerControl
 
 from core.utils import file_utils
+from core.utils.logger_utils import get_logger
+
+logger = get_logger(__file__.rsplit("/", 1)[-1])
 
 
 def map_travel(travel_file):
     """Generate and display the biblical journeys map."""
+    logger.debug("mapping trip details from %s", travel_file)
     updated_map_file_path = "data/output/Enhanced_Biblical_Journeys_Map.html"
     biblical_travel_data = file_utils.load_from_json(travel_file)
     generate_enhanced_biblical_map_with_routes(
@@ -34,6 +38,8 @@ def generate_enhanced_biblical_map_with_routes(data, file_path):
     Returns:
     - str: Path to the generated HTML file.
     """
+    logger.debug("generating maps with routes")
+
     # Initialize a map centered near Israel
     m = folium.Map(location=[31.5, 35.5], zoom_start=6)
 
@@ -99,6 +105,7 @@ def create_marker_layer(data, location_journeys, location_coordinates):
     - FeatureGroup: A Folium feature group containing markers.
     """
     markers = FeatureGroup(name="Markers")
+    logger.debug("creating marker layers")
 
     for journey in data:
         source_coords = journey["lat_long_source"]
@@ -148,6 +155,7 @@ def create_route_layer(data):
     - FeatureGroup: A Folium feature group containing routes.
     """
     routes = FeatureGroup(name="Routes")
+    logger.debug("creating routes")
 
     for journey in data:
         line_popup = generate_route_popup(journey)
@@ -175,6 +183,8 @@ def generate_marker_popup(location, journey, marker_type):
     Returns:
     - str: HTML string for the marker popup.
     """
+    logger.debug("generating marker popups")
+
     return (
         f"<b>{marker_type}:</b> {location}<br>"
         f"<b>Associated Journey:</b> {journey['journey']}<br>"
@@ -194,6 +204,8 @@ def generate_route_popup(journey):
     Returns:
     - str: HTML string for the route popup.
     """
+    logger.debug("generating route popups")
+
     return (
         f"<b>Journey:</b> {journey['journey']}<br>"
         f"<b>Distance:</b> {journey['distance_km']} km<br>"

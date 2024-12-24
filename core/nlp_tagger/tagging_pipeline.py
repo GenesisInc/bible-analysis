@@ -1,7 +1,6 @@
 """entity analysis extract few entities from bible"""
 
-# bible-analysis/core/nlp_tagger/tagger.py
-# bible-analysis/core/analysis_tools.py
+# bible-analysis/core/nlp_tagger/tagging_pipeline.py
 
 import csv
 import json
@@ -14,16 +13,17 @@ from pathlib import Path
 import spacy
 
 from core.utils import file_utils
+from core.utils.logger_utils import get_logger
+
+logger = get_logger(__file__.rsplit("/", 1)[-1])
 
 # Load spaCy model
 nlp = spacy.load("en_core_web_sm", disable=["parser"])
-# # Load spaCy's English NLP model
-# nlp = spacy.load("en_core_web_sm")
 
 # Constants
 OUTPUT_DIR = Path("analysis")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-BASE_PATH = "../newWorldTranslation/english/2013-release"
+# BASE_PATH = "../newWorldTranslation/english/2013-release"
 
 EXCLUSION_KEYWORDS = {"reigned", "gathered to", "length of", "satisfied with years"}
 # LIFESPAN_INDICATORS = {"lived for", "was", "amounted to", "were", "to be"}
@@ -109,16 +109,6 @@ occupation_keywords = {
     "weaver",
     "winemaker",
 }
-
-
-# def tag_entities_from_verse(verse_text):
-#     """Tag named entities using spaCy."""
-#     doc = nlp(verse_text)
-#     return {
-#         "PERSON": [ent.text for ent in doc.ents if ent.label_ == "PERSON"],
-#         "DATE": [ent.text for ent in doc.ents if ent.label_ == "DATE"],
-#         "GPE": [ent.text for ent in doc.ents if ent.label_ == "GPE"],
-#     }
 
 
 # called by main.py->Cmd.extract_reference
@@ -290,6 +280,7 @@ def tag_chapter_entities(chapter_data):
     return chapter_entities
 
 
+# Multiprocessing-friendly wrapper for chapter processing
 def process_chapter(args):
     """Processes a single chapter for multiprocessing."""
     book, chapter_num, chapter_data = args
@@ -300,22 +291,12 @@ def process_chapter(args):
     return book, chapter_num, chapter_results
 
 
-# # Multiprocessing-friendly wrapper for chapter processing
-# def process_chapter(args):
-#     """Processes a single chapter for multiprocessing."""
-#     book, chapter_num, chapter_data = args
-#     return (
-#         book,
-#         chapter_num,
-#         tag_chapter_entities(chapter_data),
-#     )
-
-
 def perform_entity_analysis(
     bible_file, output_json_file, output_csv_file, translation="nwt", books=None
 ):
     """Extract entities, occupations, and lifespans using multiprocessing."""
     # Step 1: Load Bible data
+    logger.debug("Loading Bible data from %s", bible_file)
     bible_data = load_bible_json(bible_file)
 
     # Step 2: Prepare tasks for multiprocessing
@@ -369,33 +350,6 @@ def save_combined_results_to_csv(data, output_csv_file):
                         )
 
 
-# def perform_entity_analysis(
-#     bible_file,
-#     output_json_file,
-#     output_csv_file,
-#     translation="nwt",
-#     books=None,
-# ):
-#     """Extracts entities and occupations from the Bible using multiprocessing."""
-#     # Step 1: Load Bible data
-#     bible_data = load_bible_json(bible_file)
-
-#     # Step 2: Prepare tasks for multiprocessing
-#     tasks = prepare_tasks(bible_data, translation, books)
-
-#     # Step 3: Process tasks in parallel
-#     results = process_tasks_parallel(tasks)
-
-#     # Step 4: Reorganize results into a nested JSON structure
-#     entities_and_occupations = reorganize_results(results)
-
-#     # Step 5: Save JSON output
-#     file_utils.save_to_json(entities_and_occupations, output_json_file)
-
-#     # Step 6: Save CSV output
-#     file_utils.save_to_csv(entities_and_occupations, output_csv_file)
-
-
 def prepare_tasks(bible_data, translation, books):
     """Prepares tasks for multiprocessing."""
     return [
@@ -420,9 +374,6 @@ def reorganize_results(results):
             entities_and_occupations[book] = {}
         entities_and_occupations[book][chapter_num] = chapter_data
     return entities_and_occupations
-
-
-####### ------------------------ MERGEr ------------------------------################
 
 
 def calculate_confidence(sentence_text):

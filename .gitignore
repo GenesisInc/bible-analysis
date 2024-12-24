@@ -13,3 +13,4 @@ data/metadata
 data/tmp
 local/
 tmp
+*.log

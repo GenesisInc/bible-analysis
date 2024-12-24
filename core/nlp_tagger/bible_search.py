@@ -5,6 +5,10 @@ import json
 import re
 import sys
 
+from core.utils.logger_utils import get_logger
+
+logger = get_logger(__file__.rsplit("/", 1)[-1])
+
 
 def load_bible_data(bible_json_path):
     """Load Bible data from JSON file."""
@@ -15,6 +19,7 @@ def load_bible_data(bible_json_path):
 def search_bible(bible_data, regex, translation="nwt"):
     """Search for matches in the Bible text using a regex."""
     matches = []
+    logger.debug("searching for regex: '%s'", regex)
     for book, chapters in bible_data[translation].items():
         for chapter, verses in chapters.items():
             for verse, text in verses.items():
