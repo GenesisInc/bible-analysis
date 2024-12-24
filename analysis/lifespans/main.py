@@ -1,5 +1,7 @@
 """extract few entities from bible"""
 
+# bible-analysis/analysis/lifespans/main.py
+
 import argparse
 import csv
 import json

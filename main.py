@@ -1,11 +1,12 @@
 """main"""
 
+# bible-analysis/main.py
 import argparse
 import json
 
+from analysis.travel import mapper
 from core.nlp_tagger import bible_search, tagger
 from core.translation_loader import translation_manager
-from core.travel import mapper
 from core.utils import file_utils
 from core.visualization import visualization
 
