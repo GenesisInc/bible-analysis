@@ -8,7 +8,10 @@ from analysis.travel import mapper
 from core.nlp_tagger import bible_search, tagging_pipeline
 from core.translation_loader import translation_manager
 from core.utils import file_utils
+from core.utils.logger_utils import get_logger
 from core.visualization import visualization
+
+logger = get_logger(__file__.rsplit("/", 1)[-1])
 
 
 def setup_parsers():
@@ -229,6 +232,7 @@ def setup_extract_translation_parser(subparsers):
 def handle_command(args):
     """Handle the parsed command."""
     if args.command == "tag-entities":
+        logger.debug("Starting entity tagging for %s", args.input_file, exc_info=True)
         tagging_pipeline.perform_entity_analysis(
             args.input_file,
             args.output_json,
@@ -237,6 +241,7 @@ def handle_command(args):
             books=args.books,
         )
     elif args.command == "search":
+        logger.debug("Searching for phrase: '%s' in %s", args.phrase, args.input_file)
         matches = bible_search.find_matches(
             args.input_file,
             args.phrase,
@@ -249,6 +254,10 @@ def handle_command(args):
                 print(
                     f"{match['book']} {match['chapter']}:{match['verse']} - {match['text']}"
                 )
+        logger.debug("Search completed.")
+        if matches:
+            logger.debug("Found %d matches.", len(matches))
+
     elif args.command == "extract-reference":
         result = tagging_pipeline.extract_reference(
             args.input_file, args.reference, args.translation
