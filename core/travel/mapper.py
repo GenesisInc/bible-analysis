@@ -6,16 +6,17 @@ import subprocess
 import folium
 from folium import FeatureGroup, LayerControl
 
-from core.travel import journey_data
+from core.utils import file_utils
 
 
-def map_travel():
+def map_travel(travel_file):
     """Generate and display the biblical journeys map."""
-    updated_map_file_path = "Enhanced_Biblical_Journeys_Map.html"
+    updated_map_file_path = "data/output/Enhanced_Biblical_Journeys_Map.html"
+    biblical_travel_data = file_utils.load_from_json(travel_file)
     generate_enhanced_biblical_map_with_routes(
-        journey_data.biblical_travel_data, updated_map_file_path
+        biblical_travel_data, updated_map_file_path
     )
-    print(f"generated trips map with {len(journey_data.biblical_travel_data)} points")
+    print(f"generated trips map with {len(biblical_travel_data)} points")
     open_map(updated_map_file_path)
 
 
@@ -221,4 +222,4 @@ def open_map(file_path):
 
 
 if __name__ == "__main__":
-    map_travel()
+    map_travel("data/input/travel/journey_data.json")

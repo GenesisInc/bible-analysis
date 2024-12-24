@@ -3,12 +3,10 @@
 import argparse
 import json
 
-from core.nlp_tagger import tagger, bible_search
-from core.travel import mapper
-
+from core.nlp_tagger import bible_search, tagger
 from core.translation_loader import translation_manager
-
-from core.science import facts
+from core.travel import mapper
+from core.utils import file_utils
 from core.visualization import visualization
 
 
@@ -38,7 +36,7 @@ def setup_timeline_parser(subparsers):
     timeline_parser.add_argument(
         "--input-file",
         type=str,
-        default="core/science/science_data.py",
+        default="data/input/science/facts.json",
         help="Input CSV file for timeline data (default: %(default)s).",
     )
     timeline_parser.add_argument(
@@ -92,13 +90,13 @@ def setup_travel_parser(subparsers):
     reference_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/travels.csv",
+        default="data/input/travel/journey_data.json",
         help="vivew travel map (default: %(default)s).",
     )
     reference_parser.add_argument(
         "--output-file",
         type=str,
-        default="data/travel-maps.csv",
+        default="data/output/travel-maps.csv",
         help="vivew travel map (default: %(default)s).",
     )
 
@@ -112,19 +110,19 @@ def setup_extract_entities_parser(subparsers):
     extract_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/nwt_bible.json",
+        default="data/input/nwt_bible.json",
         help="Input JSON file for Bible data (default: %(default)s).",
     )
     extract_parser.add_argument(
         "--output-json",
         type=str,
-        default="data/bible_entities.json",
+        default="data/output/bible_entities.json",
         help="Output JSON file for extracted entities (default: %(default)s).",
     )
     extract_parser.add_argument(
         "--output-csv",
         type=str,
-        default="data/bible_entities.csv",
+        default="data/output/bible_entities.csv",
         help="Output CSV file for extracted entities (default: %(default)s).",
     )
     extract_parser.add_argument(
@@ -150,7 +148,7 @@ def setup_search_parser(subparsers):
     search_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/nwt_bible.json",
+        default="data/input/nwt_bible.json",
         help="Input JSON file for Bible data (default: %(default)s).",
     )
     search_parser.add_argument(
@@ -185,7 +183,7 @@ def setup_extract_reference_parser(subparsers):
     reference_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/nwt_bible.json",
+        default="data/input/nwt_bible.json",
         help="Input JSON file for Bible data (default: %(default)s).",
     )
     reference_parser.add_argument(
@@ -211,7 +209,7 @@ def setup_extract_translation_parser(subparsers):
     translation_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/multi_translation.json",
+        default="data/input/multi_translation.json",
         help="Input JSON file for multi-translation Bible data (default: %(default)s).",
     )
     translation_parser.add_argument(
@@ -223,7 +221,7 @@ def setup_extract_translation_parser(subparsers):
     translation_parser.add_argument(
         "--output-file",
         type=str,
-        default="data/extracted_translation.json",
+        default="data/output/extracted_translation.json",
         help="Output JSON file for extracted translation (default: %(default)s).",
     )
 
@@ -257,7 +255,7 @@ def handle_command(args):
         )
         print(result)
     elif args.command == "trips":
-        mapper.map_travel()
+        mapper.map_travel(args.input_file)
     elif args.command == "extract-translation":
         with open(args.input_file, "r", encoding="utf-8") as f:
             multi_translation_data = json.load(f)
@@ -272,7 +270,7 @@ def handle_command(args):
         print(f"Extracted {args.translation} translation saved to {args.output_file}")
     elif args.command == "science":
         # Handle timeline generation and adding events
-        events = facts.facts
+        events = file_utils.load_from_json(args.input_file)
         if args.add_event:
             new_event = {
                 "Item": args.item,
