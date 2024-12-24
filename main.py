@@ -9,6 +9,7 @@ from core.nlp_tagger import bible_search, tagger
 from core.translation_loader import translation_manager
 from core.utils import file_utils
 from core.visualization import visualization
+from core.nlp_tagger import lifespan_tagger
 
 
 def setup_parsers():
@@ -18,14 +19,36 @@ def setup_parsers():
     )
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
-    setup_extract_entities_parser(subparsers)
+    setup_tag_entities_parser(subparsers)
     setup_search_parser(subparsers)
     setup_extract_reference_parser(subparsers)
     setup_extract_translation_parser(subparsers)
     setup_travel_parser(subparsers)
     setup_timeline_parser(subparsers)  # Added timeline parser
-
+    setup_lifespan_parser(subparsers)
     return parser
+
+
+def setup_lifespan_parser(subparsers):
+    """Set up lifespan parser for lifespan and entity tagging."""
+    lifespan_parser = subparsers.add_parser(
+        "lifespan",
+        help="Analyze Bible text for lifespan detection or entity extraction.",
+    )
+    lifespan_parser.add_argument(
+        "--tag-entities", action="store_true", help="Run entity tagging on Bible text."
+    )
+    lifespan_parser.add_argument(
+        "--extract-lifespan",
+        action="store_true",
+        help="Run lifespan extraction on Bible text.",
+    )
+    lifespan_parser.add_argument(
+        "--base-path",
+        type=str,
+        default="../newWorldTranslation/english/2013-release",
+        help="Base path to Bible text files (default: %(default)s).",
+    )
 
 
 def setup_timeline_parser(subparsers):
@@ -102,10 +125,10 @@ def setup_travel_parser(subparsers):
     )
 
 
-def setup_extract_entities_parser(subparsers):
-    """setup extract-entities parser"""
+def setup_tag_entities_parser(subparsers):
+    """setup tag-entities parser"""
     extract_parser = subparsers.add_parser(
-        "extract-entities",
+        "tag-entities",
         help="Extract entities and occupations from Bible JSON data.",
     )
     extract_parser.add_argument(
@@ -229,7 +252,7 @@ def setup_extract_translation_parser(subparsers):
 
 def handle_command(args):
     """Handle the parsed command."""
-    if args.command == "extract-entities":
+    if args.command == "tag-entities":
         tagger.perform_entity_analysis(
             args.input_file,
             args.output_json,
@@ -290,6 +313,13 @@ def handle_command(args):
             print(f"Added event: {new_event}")
         else:
             visualization.generate_mermaid_charts(events)
+    elif args.command == "lifespan":
+        if args.tag_entities:
+            lifespan_tagger.process_entities(args.base_path)
+        elif args.extract_lifespan:
+            lifespan_tagger.process_lifespan(args.base_path)
+        else:
+            print("Please specify --tag-entities or --extract-lifespan.")
     else:
         print("Invalid command. Use --help for available options.")
 

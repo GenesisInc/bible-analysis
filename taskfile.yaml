@@ -151,9 +151,30 @@ vars:
     3 John:1
     Jude:1
     Revelation:22
+  # merged from other taskfile - needs cleanup
+  COMMA_PAT: '
+    s/\([0-9]\),\([0-9]\)/\1\2/g;
+    s/,/ /g
+    '
+  SPACE_PAT: "s/ / /g; s/;/ /g; s/[[:space:]][[:space:]]*/ /g; s/ $//g"
+  SEMICOLON_PAT: "s/;/ /g"
+  PLAIN_BASE_DIR: ../newWorldTranslation/english/2013-release-plain-text
+  RAW_BASE_DIR: ../newWorldTranslation/english/2013-release
+  FILE_PAT: "{{.PLAIN_BASE_DIR}}/*/*"
+  # ! merged from other taskfile - needs cleanup
 
 tasks:
   default: task -a
+
+  test:
+    cmds:
+      - task search -- 'word of god'
+      - task ref -- genesis 1:1
+      # - task: tag-entities
+      # - task: convert_2_csv
+      # - task: extract_translations
+      - task ref-all -- genesis 1:1
+      - task ref-multi -- genesis 1:1
 
   project-structure:
     cmds:
@@ -170,13 +191,13 @@ tasks:
         ln -sfn ../../../bible-text/data/tmp/nwt_bible.json data/input/.
         ln -sfn ../../../bible-text/data/tmp/multi_translation.json data/input/.
 
-  extract-sample:
+  tag-entities-sample:
     aliases:
       - es
     cmds:
       - |
         uv run main.py \
-          extract-entities \
+          tag-entities \
           --input-file "{{.bible_data_json}}" \
           --output-json "{{.entities_json_file}}" \
           --output-csv "{{.entities_csv_file}}" \
@@ -185,20 +206,32 @@ tasks:
 
   nlp-tag:
     aliases:
-      - tag
+      - tag-entities
     desc: tag entities in a translation into 2 output files        ... task nlp-tag -- nwt
     cmds:
       - |
         if [[ ! -f "{{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json" ]]; then
-          echo "file {{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json not found, exiting. Try task extract-translations"
+          echo "file {{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json not found, exiting. Try task extract_translations"
           exit 1
         fi
         uv run main.py \
-          extract-entities \
+          tag-entities \
           --input-file "{{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json" \
           --output-json "{{.OUTPUT_DIR}}/{{.CLI_ARGS| default .translation}}_entities.json" \
           --output-csv "{{.OUTPUT_DIR}}/{{.CLI_ARGS| default .translation}}_entities.csv" \
           --translation "{{.CLI_ARGS| default .translation}}"
+      - task: verify-nlp-tag
+
+  verify-nlp-tag:
+    cmds:
+      - |
+        wc -l "{{.OUTPUT_DIR}}/{{.CLI_ARGS| default .translation}}_entities.json" \
+          "{{.OUTPUT_DIR}}/{{.CLI_ARGS| default .translation}}_entities.csv"
+
+  verify_convert_2_csv:
+    cmds:
+      - |
+        wc -l {{.OUTPUT_DIR}}/nwt_bible.csv {{.OUTPUT_DIR}}/asv_bible.csv {{.OUTPUT_DIR}}/kj21_bible.csv
 
   convert_2_csv:
     silent: true
@@ -245,8 +278,15 @@ tasks:
           | [$book_entry.key, $chapter_entry.key, $verse_entry.key, $verse_entry.value] | @csv
         ' {{.OUTPUT_DIR}}/kj21_bible.json > {{.OUTPUT_DIR}}/kj21_bible.csv
         echo "generated {{.OUTPUT_DIR}}/kj21_bible.csv"
+      - task: verify_convert_2_csv
 
-  extract-translations:
+  verify_extract_translations:
+    cmds:
+      - |
+        wc -l {{.OUTPUT_DIR}}/asv_bible.json {{.OUTPUT_DIR}}/kj21_bible.json \
+          {{.OUTPUT_DIR}}/nwt_bible.json {{.OUTPUT_DIR}}/ojb_bible.json
+
+  extract_translations:
     cmds:
       - |
         # extract asv
@@ -268,6 +308,7 @@ tasks:
         uv run python3 main.py extract-translation --translation "ojb" \
           --input-file {{.INPUT_DIR}}/multi_translation.json \
           --output-file {{.OUTPUT_DIR}}/ojb_bible.json
+      - task: verify_extract_translations
 
   verify-extracted-json:
     cmds:
@@ -323,18 +364,18 @@ tasks:
         cmd: |
           printf "%-5s: " {{.ITEM}}
           uv run python3 main.py extract-reference \
-            --input-file {{.INPUT_DIR}}/{{.ITEM}}_bible.json \
+            --input-file {{.OUTPUT_DIR}}/{{.ITEM}}_bible.json \
             --translation {{.ITEM}} \
             --reference "{{.CLI_ARGS}}"
 
   ref-multi:
     silent: true
-    desc: refs from one or more transalations                      ... task ref-multi -- genesis 1.1
+    desc: refs from one or more transalations                      ... task ref-multi -- genesis 1:1
     cmds:
       - |
         BOOK=$(echo "{{.CLI_ARGS}}" | awk '{print tolower($1)}')    # Extract book name (e.g., genesis)
-        CHAPTER=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d'.' -f1)  # Extract chapter
-        VERSE=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d'.' -f2)    # Extract verse
+        CHAPTER=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d':' -f1)  # Extract chapter
+        VERSE=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d':' -f2)    # Extract verse
 
         # Use jq to extract the specific reference
         jq -r --arg book "$BOOK" --arg chapter "$CHAPTER" --arg verse "$VERSE" \
@@ -552,3 +593,152 @@ tasks:
           echo -e "   Translation: {{.YELLOW}}{{.translation}}{{.RESET}}"
           (head -n${top} "{{.out}}" && tail -n${btm} "{{.out}}") | mlr --c2p --barred cat -n
         fi
+
+  # merged from other taskfile - needs cleanup
+  clean_symbols:
+    cmds:
+      - task: semicolon
+      - task: comma
+      - task: spaces
+      - task: remove-symbols
+      - task: square-brackets
+      - task: special-cases
+
+  special_cases:
+    cmds:
+      - |
+        # Remove only leading or trailing Unicode hyphens (EN DASH and EM DASH), but keep internal hyphens intact
+        sed -i "" 's/^[\–—]\+//; s/[\–—]\+$//' {{.FILE_PAT}}
+
+  verify-special-cases:
+    cmds:
+      - |
+        words=("—He" "—I" "2" "—Let" "Mountains" "—Sihon" "—The" "—provided" "—that" "——" "perished—the")
+
+        for word in "${words[@]}" ; do
+          echo "$word" | sed 's/^[\–—]\+//; s/[\–—]\+$//'
+        done
+
+  square-brackets_2:
+    cmds:
+      - |
+        # cleanup these words
+        #   [Ayin]In [Ayin]They [Beth]In [Beth]Who [Daleth]And [Daleth]They
+        #   [Lamed]12 [Lamed]By [Nun]He [Nun]Trustworthy [Waw]And
+        sed -i "" 's/\[.*\]//g;' {{.FILE_PAT}}
+
+  square-brackets:
+    cmds:
+      - |
+        # Remove text within square brackets
+        sed -i "" 's/\[[^]]*\]//g' {{.FILE_PAT}}
+
+  remove-unicode-symbols:
+    cmds:
+      - |
+        # Remove symbols including additional Unicode symbols
+        sed -i "" 's/[()“”.;:‘ʹ·"!?’בדויִלנכע]//g' {{.FILE_PAT}}
+
+  remove-symbols:
+    cmds:
+      - |
+        # remove other symbols
+        sed -i "" 's/[()“”.;:‘ʹ·"!?’]//g;' {{.FILE_PAT}}
+
+  spaces:
+    cmds:
+      - |
+        sed -i "" "{{.SPACE_PAT}}" {{.FILE_PAT}}
+
+  semicolon:
+    cmds:
+      - |
+        sed -i "" "{{.SEMICOLON_PAT}}" {{.FILE_PAT}}
+
+  comma:
+    cmds:
+      - |
+        sed -i "" "{{.COMMA_PAT}}" {{.FILE_PAT}}
+
+  split:
+    cmds:
+      - |
+        mkdir -p tmp
+        # Split words and numbers
+        cat {{.FILE_PAT}} | tr ' ' '\n' > analysis/words.list
+
+        # Separate numbers and words
+        grep '^[0-9]' analysis/words.list > tmp/numeric.list
+        grep '^[^0-9]' analysis/words.list > tmp/words_only.list
+
+        # Process numeric list: sort numerically and count occurrences
+        cat tmp/numeric.list | sort -n | uniq -c | sort -k2,2n > tmp/numeric-counts.list
+
+        # Process words list: sort by count (desc), then alphabetically
+        cat tmp/words_only.list | sort | uniq -c | sort -k1,1nr -k2,2 > tmp/words-counts.list
+
+        # Combine both lists: numbers first, then words
+        cat tmp/words-counts.list tmp/numeric-counts.list > analysis/word_counts.list
+
+  fix-verse-separator:
+    cmds:
+      - |
+        for file in newWorldTranslation/english/2013-release/*/*; do
+          sed -E -i '' 's/^1 /1 /' "$file"
+        done
+
+  split-2:
+    cmds:
+      - |
+        cat {{.FILE_PAT}}  | tr ' ' '\n' > analysis/words.list
+        cat analysis/words.list | sort | uniq -c | sort -n > analysis/word_counts.list
+
+  analyze:
+    cmds:
+      - |
+        cat -n analysis/word_counts.list
+
+  verify:
+    cmds:
+      - |
+        words=("day,16" "saying,May" "10,100" "10,x" "x,10" "them,Because" "multi   spaces" "greedy one; [Nun]He")
+
+        for word in "${words[@]}" ; do
+          echo "$word" \
+            | sed "{{.COMMA_PAT}}" \
+            | sed "{{.SPACE_PAT}}"
+        done
+  run: task -p gen_tag gen_lifespan
+  gen_tag:
+    parellel: true
+    cmds:
+      - uv run main.py --tag-entities
+
+  person_lifespan:
+    desc: persons with lifespan in bible.json
+    cmds:
+      - |
+        jq -r '
+        to_entries[] | .value |
+        to_entries[] | .value |
+        keys[]' analysis/lifespans.json \
+        | sort \
+        | uniqå
+
+  gen_lifespan:
+    parellel: true
+    cmds:
+      - uv run main.py --extract-lifespan
+
+  wc:
+    cmds:
+      - |
+        wc {{.FILE_PAT}}
+
+  refresh_plain_text:
+    cmds:
+      - |
+        rm -rf {{.PLAIN_BASE_DIR}}
+        cp -r {{.RAW_BASE_DIR}} {{.PLAIN_BASE_DIR}}
+
+  # ! merged from other taskfile - needs cleanup
