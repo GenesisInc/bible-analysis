@@ -170,11 +170,11 @@ tasks:
     cmds:
       - task search -- 'word of god'
       - task ref -- genesis 1:1
-      # - task: tag-entities
-      # - task: convert_2_csv
-      # - task: extract_translations
+      - task: convert_2_csv
+      - task: extract_translations
       - task ref-all -- genesis 1:1
       - task ref-multi -- genesis 1:1
+      # - task: tag-entities
 
   project-structure:
     cmds:
@@ -712,7 +712,7 @@ tasks:
   gen_tag:
     parellel: true
     cmds:
-      - uv run main.py --tag-entities
+      - uv run main.py lifespan --tag
 
   person_lifespan:
     desc: persons with lifespan in bible.json
