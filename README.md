@@ -69,7 +69,66 @@ Manually create those 2 links mentioned in the taslfile.yaml->link-data
 
 then, you may run below commands to see the data.
 
-## usage - sample reports
+## usage - interact directly with python scripts
+
+- get help
+
+        ❯ uv run python main.py  --help
+        usage: main.py [-h] {tag-entities,search,reference,extract,trips,science} ...
+
+        CLI to process Bible text, extract entities, and perform searches.
+
+        options:
+        -h, --help            show this help message and exit
+
+        Commands:
+        {tag-entities,search,reference,extract,trips,science}
+            tag-entities        Extract entities, occupations, and lifespans from Bible JSON data.
+            search              Search for a phrase in the Bible text and display matches.
+            reference           Extract text for a specific Bible reference.
+            extract             Extract a specific translation from the multi-translation JSON.
+            trips               view travels
+            science             Generate and visualize timeline charts for scientific and biblical events.
+
+- tag-entities
+
+        uv run main.py \
+            tag-entities \
+            --input-file "data/input/nwt_bible.json" \
+            --output-json "data/output/nwt_entities.json" \
+            --output-csv "data/output/nwt_entities.csv" \
+            --translation "nwt"
+
+- extract translations
+
+        # extract asv
+        uv run python3 main.py extract --translation "asv" \
+            --input-file data/input/multi_translation.json \
+            --output-file data/output/asv_bible.json
+
+- get reference
+
+        uv run python3 main.py reference \
+            --input-file data/input/nwt_bible.json \
+            --translation nwt \
+            --reference "revelation 1:1-4
+
+- search text
+
+        uv run python3 main.py search --phrase 'word of god' \
+            --input-file "data/input/nwt_bible.json" \
+            --top-n 5 --csv \
+            --translation nwt
+
+- chart trips
+
+        uv run main.py trips
+
+- science facts
+
+        uv run main.py science
+
+## usage - sample reports with tasks
 
 - legends
 
