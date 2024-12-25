@@ -171,7 +171,7 @@ tasks:
       - task search -- 'word of god'
       - task ref -- genesis 1:1
       - task: convert_2_csv
-      - task: extract_translations
+      - task: extract
       - task ref-all -- genesis 1:1
       - task ref-multi -- genesis 1:1
       # - task: tag-entities
@@ -211,7 +211,7 @@ tasks:
     cmds:
       - |
         if [[ ! -f "{{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json" ]]; then
-          echo "file {{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json not found, exiting. Try task extract_translations"
+          echo "file {{.INPUT_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json not found, exiting. Try 'task extract'"
           exit 1
         fi
         uv run main.py \
@@ -237,10 +237,11 @@ tasks:
     silent: true
     cmds:
       - |
+        MSG="you may need to run below dependent jobs: \n\t1. load-bibles \n\t2. extract "
         # convert nwt_bible.json to nwt_bible.csv
         if [[ ! -f {{.OUTPUT_DIR}}/nwt_bible.json ]] ; then
           echo "file not found: {{.OUTPUT_DIR}}/nwt_bible.json"
-          echo -e "you may need to run below dependent jobs: \n\t1. load-bibles \n\t2. extract-translation "
+          echo -e "${MSG}"
           exit 1
         fi
         jq -r '
@@ -254,7 +255,7 @@ tasks:
         # convert asv_bible.json to asv_bible.csv
         if [[ ! -f {{.OUTPUT_DIR}}/asv_bible.json ]]; then
           echo "file not found: {{.OUTPUT_DIR}}/asv_bible.json"
-          echo -e "you may need to run below dependent jobs: \n\t1. load-bibles \n\t2. extract-translation "
+          echo -e "${MSG}"
           exit 1
         fi
         jq -r '
@@ -268,7 +269,7 @@ tasks:
         # convert kj21_bible.json to kj21_bible.csv
         if [[ ! -f {{.OUTPUT_DIR}}/kj21_bible.json ]]; then
           echo "file not found: {{.OUTPUT_DIR}}/kj21_bible.json"
-          echo -e "you may need to run below dependent jobs: \n\t1. load-bibles \n\t2. extract-translation "
+          echo -e "${MSG}"
           exit 1
         fi
         jq -r '
@@ -280,35 +281,35 @@ tasks:
         echo "generated {{.OUTPUT_DIR}}/kj21_bible.csv"
       - task: verify_convert_2_csv
 
-  verify_extract_translations:
+  verify_extract:
     cmds:
       - |
         wc -l {{.OUTPUT_DIR}}/asv_bible.json {{.OUTPUT_DIR}}/kj21_bible.json \
           {{.OUTPUT_DIR}}/nwt_bible.json {{.OUTPUT_DIR}}/ojb_bible.json
 
-  extract_translations:
+  extract:
     cmds:
       - |
         # extract asv
-        uv run python3 main.py extract-translation --translation "asv" \
+        uv run python3 main.py extract --translation "asv" \
           --input-file {{.INPUT_DIR}}/multi_translation.json \
           --output-file {{.OUTPUT_DIR}}/asv_bible.json
 
         # extract kj21
-        uv run python3 main.py extract-translation --translation "kj21" \
+        uv run python3 main.py extract --translation "kj21" \
           --input-file {{.INPUT_DIR}}/multi_translation.json \
           --output-file {{.OUTPUT_DIR}}/kj21_bible.json
 
         # extract nwt
-        uv run python3 main.py extract-translation --translation "nwt" \
+        uv run python3 main.py extract --translation "nwt" \
           --input-file {{.INPUT_DIR}}/multi_translation.json \
           --output-file {{.OUTPUT_DIR}}/nwt_bible.json
 
         # extract ojb
-        uv run python3 main.py extract-translation --translation "ojb" \
+        uv run python3 main.py extract --translation "ojb" \
           --input-file {{.INPUT_DIR}}/multi_translation.json \
           --output-file {{.OUTPUT_DIR}}/ojb_bible.json
-      - task: verify_extract_translations
+      - task: verify
 
   verify-extracted-json:
     cmds:
@@ -351,7 +352,7 @@ tasks:
     cmds:
       - |
         printf "%-5s: " {{.translation}}
-        uv run python3 main.py extract-reference \
+        uv run python3 main.py reference \
           --input-file {{.INPUT_DIR}}/{{.translation}}_bible.json \
           --translation {{.translation}} \
           --reference "{{.CLI_ARGS}}"
@@ -363,7 +364,7 @@ tasks:
       - for: { var: translations }
         cmd: |
           printf "%-5s: " {{.ITEM}}
-          uv run python3 main.py extract-reference \
+          uv run python3 main.py reference \
             --input-file {{.OUTPUT_DIR}}/{{.ITEM}}_bible.json \
             --translation {{.ITEM}} \
             --reference "{{.CLI_ARGS}}"
@@ -373,7 +374,7 @@ tasks:
     desc: refs from one or more transalations                      ... task ref-multi -- genesis 1:1
     cmds:
       - |
-        BOOK=$(echo "{{.CLI_ARGS}}" | awk '{print tolower($1)}')    # Extract book name (e.g., genesis)
+        BOOK=$(echo "{{.CLI_ARGS}}" | awk '{print tolower($1)}')            # Extract book name
         CHAPTER=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d':' -f1)  # Extract chapter
         VERSE=$(echo "{{.CLI_ARGS}}" | awk '{print $2}' | cut -d':' -f2)    # Extract verse
 

@@ -23,8 +23,8 @@ def setup_parsers():
 
     setup_tag_entities_parser(subparsers)
     setup_search_parser(subparsers)
-    setup_extract_reference_parser(subparsers)
-    setup_extract_translation_parser(subparsers)
+    setup_reference_parser(subparsers)
+    setup_extract_parser(subparsers)
     setup_travel_parser(subparsers)
     setup_timeline_parser(subparsers)  # Added timeline parser
     return parser
@@ -85,7 +85,7 @@ def setup_timeline_parser(subparsers):
 
 
 def setup_travel_parser(subparsers):
-    """setup extract-reference parser"""
+    """setup travel parser"""
     reference_parser = subparsers.add_parser(
         "trips",
         help="view travels",
@@ -177,10 +177,10 @@ def setup_search_parser(subparsers):
     )
 
 
-def setup_extract_reference_parser(subparsers):
-    """setup extract-reference parser"""
+def setup_reference_parser(subparsers):
+    """setup reference parser"""
     reference_parser = subparsers.add_parser(
-        "extract-reference",
+        "reference",
         help="Extract text for a specific Bible reference.",
     )
     reference_parser.add_argument(
@@ -203,10 +203,10 @@ def setup_extract_reference_parser(subparsers):
     )
 
 
-def setup_extract_translation_parser(subparsers):
-    """setup extract-translation parser"""
+def setup_extract_parser(subparsers):
+    """setup extract parser"""
     translation_parser = subparsers.add_parser(
-        "extract-translation",
+        "extract",
         help="Extract a specific translation from the multi-translation JSON.",
     )
     translation_parser.add_argument(
@@ -258,14 +258,14 @@ def handle_command(args):
         if matches:
             logger.debug("Found %d matches.", len(matches))
 
-    elif args.command == "extract-reference":
+    elif args.command == "reference":
         result = tagging_pipeline.extract_reference(
             args.input_file, args.reference, args.translation
         )
         print(result)
     elif args.command == "trips":
         mapper.map_travel(args.input_file)
-    elif args.command == "extract-translation":
+    elif args.command == "extract":
         with open(args.input_file, "r", encoding="utf-8") as f:
             multi_translation_data = json.load(f)
 
