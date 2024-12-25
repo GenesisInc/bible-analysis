@@ -94,29 +94,29 @@ then, you may run below commands to see the data.
 
         uv run main.py \
             tag-entities \
-            --input-file "data/input/nwt_bible.json" \
-            --output-json "data/output/nwt_entities.json" \
-            --output-csv "data/output/nwt_entities.csv" \
+            --input-file "data/nwt_bible.json" \
+            --output-json "data/nwt_entities.json" \
+            --output-csv "data/nwt_entities.csv" \
             --translation "nwt"
 
 - extract translations
 
         # extract asv
         uv run python3 main.py extract --translation "asv" \
-            --input-file data/input/multi_translation.json \
-            --output-file data/output/asv_bible.json
+            --input-file data/multi_translation.json \
+            --output-file data/asv_bible.json
 
 - get reference
 
         uv run python3 main.py reference \
-            --input-file data/input/nwt_bible.json \
+            --input-file data/nwt_bible.json \
             --translation nwt \
-            --reference "revelation 1:1-4
+            --reference "revelation 1:1-4"
 
 - search text
 
         uv run python3 main.py search --phrase 'word of god' \
-            --input-file "data/input/nwt_bible.json" \
+            --input-file "data/nwt_bible.json" \
             --top-n 5 --csv \
             --translation nwt
 
