@@ -130,19 +130,28 @@ then, you may run below commands to see the data.
 
 ## usage - sample reports with tasks
 
-- legends
+- legends / summary
 
         ❯ task legends
-            +------------+-------+----------------------------------------------+
-            | Type       | count | Explanation                                  |
-            +------------+-------+----------------------------------------------+
-            | PERSON     | 17662 | Names of individuals                         |
-            | DATE       | 3432  | Explicit or implicit date expressions        |
-            | GPE        | 9478  | Geopolitical entities (places)               |
-            | ORG        | 4254  | Organizations or groups                      |
-            | OCCUPATION | 6273  | Roles or professions                         |
-            | NORP       | 1380  | Nationalities, religious or political groups |
-            +------------+-------+----------------------------------------------+
+        ❯ task summary
+            +------------+-------+------+---------------------------------------------+
+            | item       | total | uniq | exp                                         |
+            +------------+-------+------+---------------------------------------------+
+            | DATE       | 3356  | 707  | Explicit or implicit date expressions       |
+            | GPE        | 8946  | 1058 | Geopolitical entities (places)              |
+            | LIFESPAN   | 36    | 34   | Lifespan of persons                         |
+            | NORP       | 1325  | 241  | Nationalities religious or political groups |
+            | OCCUPATION | 5396  | 44   | Roles or professions                        |
+            | ORG        | 4136  | 1204 | Organizations or groups                     |
+            | PERSON     | 16326 | 1656 | Names of individuals                        |
+            +------------+-------+------+---------------------------------------------+
+
+This needs .env to read the values for below variables to connect to Psql db.
+
+    ❯ cat .env
+    # DB secrets
+    DB_NAME=example_db_name
+    DB_USER=example_db_user
 
 - names recorded in the bible
 
