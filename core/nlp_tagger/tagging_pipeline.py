@@ -4,16 +4,23 @@
 
 import csv
 import json
-import os
 import re
-import unicodedata
 from multiprocessing import Pool
 from pathlib import Path
 
 import spacy
 
+from config.tagging_config import (
+    EVENT_KEYWORDS,  # ADDITIONAL_CATEGORIES,
+    LIFESPAN_CONFIDENCE_THRESHOLD,
+    RELATIONSHIP_KEYWORDS,
+)
 from core.utils import file_utils
 from core.utils.logger_utils import get_logger
+
+# import os
+# import unicodedata
+
 
 logger = get_logger(__file__.rsplit("/", 1)[-1])
 
@@ -316,38 +323,63 @@ def perform_entity_analysis(
 
 
 def save_combined_results_to_csv(data, output_csv_file):
-    """Save entities, occupations, and lifespan details to a CSV file."""
+    """Save entities, occupations, lifespans, relationships, and events to a CSV file."""
     with open(output_csv_file, "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
+        # Write header
         writer.writerow(["Book", "Chapter", "Verse", "Type", "Text"])
 
         for book, chapters in data.items():
             for chapter, verses in chapters.items():
                 for verse_num, results in verses.items():
-                    # Write entities
-                    for entity_type, entity_list in results["entities"].items():
-                        for entity in entity_list:
-                            writer.writerow(
-                                [book, chapter, verse_num, entity_type, entity]
-                            )
+                    # Save different result types
+                    save_entities(writer, book, chapter, verse_num, results["entities"])
+                    save_list(
+                        writer,
+                        book,
+                        chapter,
+                        verse_num,
+                        "OCCUPATION",
+                        results["occupations"],
+                    )
+                    save_list(
+                        writer,
+                        book,
+                        chapter,
+                        verse_num,
+                        "LIFESPAN",
+                        [l["Context"]["Text"] for l in results["lifespans"]],
+                    )
+                    save_list(
+                        writer,
+                        book,
+                        chapter,
+                        verse_num,
+                        "RELATIONSHIP",
+                        results.get("relationships", []),
+                    )
+                    save_list(
+                        writer,
+                        book,
+                        chapter,
+                        verse_num,
+                        "EVENT",
+                        results.get("events", []),
+                    )
+    print(f"data successfully written to {output_csv_file}")
 
-                    # Write occupations
-                    for occupation in results["occupations"]:
-                        writer.writerow(
-                            [book, chapter, verse_num, "OCCUPATION", occupation]
-                        )
 
-                    # Write lifespans
-                    for lifespan in results["lifespans"]:
-                        writer.writerow(
-                            [
-                                book,
-                                chapter,
-                                verse_num,
-                                "LIFESPAN",
-                                lifespan["Context"]["Text"],
-                            ]
-                        )
+def save_entities(writer, book, chapter, verse_num, entities):
+    """Write entities to the CSV."""
+    for entity_type, entity_list in entities.items():
+        for entity in entity_list:
+            writer.writerow([book, chapter, verse_num, entity_type, entity])
+
+
+def save_list(writer, book, chapter, verse_num, result_type, items):
+    """Write a list of items to the CSV with the specified type."""
+    for item in items:
+        writer.writerow([book, chapter, verse_num, result_type, item])
 
 
 def prepare_tasks(bible_data, translation, books):
@@ -392,23 +424,63 @@ def calculate_confidence(sentence_text):
 def tag_entities_and_lifespan(verse_text, book, chapter, verse_num):
     """Extract entities, occupations, and lifespan details from a verse."""
     doc = nlp(verse_text)
-    results = {
+    results = initialize_results()
+
+    # Deduplication helper
+    unique_tags = set()
+
+    # Tag named entities
+    tag_named_entities(doc, results, unique_tags)
+
+    # Detect occupations
+    tag_occupations(doc, results)
+
+    # Detect lifespan phrases
+    tag_lifespan_phrases(
+        doc, verse_text, book, chapter, verse_num, results, unique_tags
+    )
+
+    # Detect relationships
+    tag_relationships(doc, verse_text, results, unique_tags)
+
+    # Detect events
+    tag_events(doc, results)
+
+    return results
+
+
+def initialize_results():
+    """Initialize the results dictionary."""
+    return {
         "entities": {"PERSON": [], "DATE": [], "GPE": [], "ORG": [], "NORP": []},
         "occupations": [],
         "lifespans": [],
+        "relationships": [],
+        "events": [],
     }
 
-    # Tag named entities
+
+def tag_named_entities(doc, results, unique_tags):
+    """Tag named entities from the document."""
     for ent in doc.ents:
         if ent.label_ in results["entities"]:
-            results["entities"][ent.label_].append(ent.text.strip())
+            entity_key = (ent.label_, ent.text.strip())
+            if entity_key not in unique_tags:
+                results["entities"][ent.label_].append(ent.text.strip())
+                unique_tags.add(entity_key)
 
-    # Detect occupations
+
+def tag_occupations(doc, results):
+    """Tag occupations from the document."""
     results["occupations"] = [
         token.lemma_ for token in doc if token.lemma_ in occupation_keywords
     ]
 
-    # Detect lifespan phrases
+
+def tag_lifespan_phrases(
+    doc, verse_text, book, chapter, verse_num, results, unique_tags
+):
+    """Detect lifespan phrases from the document."""
     person, years = None, None
     for ent in doc.ents:
         if ent.label_ == "PERSON":
@@ -417,45 +489,42 @@ def tag_entities_and_lifespan(verse_text, book, chapter, verse_num):
             years = extract_numeric_value(ent.text)
             if years and person:
                 confidence = calculate_confidence(verse_text.lower())
-                if confidence > 0:
-                    results["lifespans"].append(
-                        {
-                            "Person": person,
-                            "Explicit Lifespan": years,
-                            "Confidence": round(confidence, 2),
-                            "Context": {
-                                "Reference": get_reference(book, chapter, verse_num),
-                                "Text": verse_text,
-                            },
-                        }
-                    )
+                if confidence > LIFESPAN_CONFIDENCE_THRESHOLD:
+                    lifespan_key = (person, years)
+                    if lifespan_key not in unique_tags:
+                        results["lifespans"].append(
+                            {
+                                "Person": person,
+                                "Explicit Lifespan": years,
+                                "Confidence": round(confidence, 2),
+                                "Context": {
+                                    "Reference": get_reference(
+                                        book, chapter, verse_num
+                                    ),
+                                    "Text": verse_text,
+                                },
+                            }
+                        )
+                        unique_tags.add(lifespan_key)
 
-    return results
+
+def tag_relationships(doc, verse_text, results, unique_tags):
+    """Detect relationships in the verse text."""
+    for keyword in RELATIONSHIP_KEYWORDS:
+        if keyword in verse_text.lower():
+            for ent in doc.ents:
+                if ent.label_ == "PERSON":
+                    relationship_key = f"RELATIONSHIP-{ent.text.strip()}"
+                    if relationship_key not in unique_tags:
+                        results["relationships"].append(ent.text.strip())
+                        unique_tags.add(relationship_key)
 
 
-def normalize_unicode(text):
-    """Cleans up Unicode characters, standardizes spaces, and trims around punctuation."""
-    # Define replacements in a dictionary for flexibility and readability
-    replacements = {
-        "\u00A0": " ",  # Non-breaking space to regular space
-        "\n": " ",  # Newline to space
-        "\u2019": "'",  # Right single quotation mark to apostrophe
-        "\u02b9": "",  # Modifier letter prime (remove)
-        "\u00b7": "",  # Middle dot (remove)
-    }
-
-    # Apply replacements using the dictionary
-    for unicode_char, replacement in replacements.items():
-        text = text.replace(unicode_char, replacement)
-
-    # Normalize to ASCII, removing accents and other diacritics
-    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-
-    # Remove extra spaces around punctuation and collapse multiple spaces
-    text = re.sub(r"\s+([,.;:!?])", r"\1", text)  # Remove space before punctuation
-    text = re.sub(r"\s{2,}", " ", text).strip()  # Collapse multiple spaces to single
-
-    return text
+def tag_events(doc, results):
+    """Detect events in the document."""
+    for token in doc:
+        if token.text.lower() in EVENT_KEYWORDS:
+            results["events"].append(token.text.lower())
 
 
 def get_reference(book, chapter, verse_num):
@@ -468,184 +537,3 @@ def extract_numeric_value(verse_text):
     """Extracts a numeric value from verse_text if it’s purely numeric."""
     numeric_text = re.sub(r"[^\d]", "", verse_text)
     return int(numeric_text) if numeric_text.isdigit() else None
-
-
-def detect_lifespan_phrases(verse_text, book, chapter, verse_num):
-    """Detect lifespan-related phrases in a verse."""
-    lifespans = []
-
-    # Process the verse text for lifespan phrases
-    doc = nlp(verse_text)
-    person, years = None, None
-
-    for ent in doc.ents:
-        if ent.label_ == "PERSON":
-            person = ent.text
-        elif ent.label_ in {"CARDINAL", "DATE"}:
-            years = extract_numeric_value(ent.text)
-            if years and person:  # Ensure both person and years are available
-                confidence = calculate_confidence(verse_text.lower())
-                if confidence > 0:
-                    lifespans.append(
-                        {
-                            "Person": person,
-                            "Explicit Lifespan": years,
-                            "Confidence": round(confidence, 2),
-                            "Context": {
-                                "Reference": get_reference(book, chapter, verse_num),
-                                "Text": verse_text,
-                            },
-                        }
-                    )
-
-    return lifespans
-
-
-def process_lifespan(input_file, json_output, csv_output):
-    """Process lifespan statements and update results."""
-    # Load Bible data from JSON file
-    with open(input_file, "r", encoding="utf-8") as file:
-        bible_data = json.load(file)
-
-    # Load existing JSON data if available
-    if os.path.exists(json_output):
-        with open(json_output, "r", encoding="utf-8") as json_file:
-            combined_data = json.load(json_file)
-    else:
-        combined_data = {}
-
-    # Prepare to update the CSV
-    csv_exists = os.path.exists(csv_output)
-    csv_file = open(csv_output, "a", newline="", encoding="utf-8")
-    csv_writer = csv.writer(csv_file)
-
-    # Write header if CSV does not exist
-    if not csv_exists:
-        csv_writer.writerow(["Book", "Chapter", "Verse", "Type", "Text"])
-
-    # Navigate the structure (e.g., "nwt")
-    for _, books in bible_data.items():
-        for book, chapters in books.items():
-            for chapter, verses in chapters.items():
-                for verse_num, verse_text in verses.items():
-                    verse_text = normalize_unicode(verse_text)
-                    lifespans = detect_lifespan_phrases(
-                        verse_text, book, chapter, verse_num
-                    )
-
-                    # Ensure the JSON structure is initialized properly
-                    book_data = combined_data.setdefault(book, {})
-                    chapter_data = book_data.setdefault(chapter, {})
-                    verse_data = chapter_data.setdefault(
-                        verse_num,
-                        {
-                            "entities": {
-                                "PERSON": [],
-                                "DATE": [],
-                                "GPE": [],
-                                "ORG": [],
-                                "NORP": [],
-                            },
-                            "occupations": [],
-                            "lifespans": [],
-                        },
-                    )
-
-                    # Append lifespan data
-                    if "lifespans" not in verse_data:
-                        verse_data["lifespans"] = []  # Ensure the key exists
-
-                    for lifespan in lifespans:
-                        verse_data["lifespans"].append(lifespan)
-                        # Update CSV
-                        csv_writer.writerow(
-                            [
-                                book,
-                                chapter,
-                                verse_num,
-                                "LIFESPAN",
-                                lifespan["Context"]["Text"],
-                            ]
-                        )
-
-    # Save updated JSON
-    with open(json_output, "w", encoding="utf-8") as json_file:
-        json.dump(combined_data, json_file, indent=2, ensure_ascii=True)
-
-    # Close the CSV file
-    csv_file.close()
-
-
-def save_results(data, data_type):
-    """Saves results to JSON and CSV files based on data type."""
-    json_path = OUTPUT_DIR / f"{data_type}.json"
-    csv_path = OUTPUT_DIR / f"{data_type}.csv"
-
-    # Save JSON file
-    with open(json_path, "w", encoding="utf-8") as json_file:
-        json.dump(data, json_file, indent=2, ensure_ascii=True)
-
-    # Save CSV file
-    with open(csv_path, "w", newline="", encoding="utf-8") as csv_file:
-        writer = csv.writer(csv_file)
-
-        if data_type == "entities":
-            # Header for entities
-            writer.writerow(
-                [
-                    "Book",
-                    "Chapter",
-                    "Entity_Type",
-                    "Entity_Name",
-                    "Count",
-                    "Verse",
-                    "Context",
-                ]
-            )
-            for book, chapters in data.items():
-                for chapter, entities in chapters.items():
-                    for entity_type, names in entities.items():
-                        for name, entity_data in names.items():
-                            for context in entity_data["Context"]:
-                                writer.writerow(
-                                    [
-                                        book,
-                                        chapter,
-                                        entity_type,
-                                        name,
-                                        entity_data["Count"],
-                                        context["Reference"],
-                                        context["Text"],
-                                    ]
-                                )
-        elif data_type == "lifespans":
-            # Header for lifespans
-            writer.writerow(
-                [
-                    "Book",
-                    "Chapter",
-                    "Person",
-                    "Explicit Lifespan",
-                    "Confidence",
-                    "Verse",
-                    "Context",
-                ]
-            )
-            for book, chapters in data.items():
-                for chapter, lifespans in chapters.items():
-                    for person, lifespan_entries in lifespans.items():
-                        for entry in lifespan_entries:
-                            writer.writerow(
-                                [
-                                    book,
-                                    chapter,
-                                    person,
-                                    entry["Explicit Lifespan"],
-                                    entry["Confidence"],
-                                    entry["Context"]["Reference"],
-                                    entry["Context"]["Text"],
-                                ]
-                            )
-        else:
-            print(f"Unsupported data type: {data_type}.")
-            print("Only 'entities' and 'lifespans' are supported.")

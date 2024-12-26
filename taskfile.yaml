@@ -220,10 +220,22 @@ tasks:
           --books john \
           --translation "{{.translation}}"
 
+  diff:
+    cmds:
+      - |
+        diff -ur data.old data
+
+  copy:
+    cmds:
+      - |
+        rsync -a --delete data/ data.old/
+
   nlp-tag:
     aliases:
       - tag-entities
     desc: tag entities in a translation into 2 output files        ... task nlp-tag -- nwt
+    deps:
+      - copy
     cmds:
       - |
         bible_file="{{.DATA_DIR}}/{{.CLI_ARGS| default .translation}}_bible.json"
@@ -240,6 +252,7 @@ tasks:
           --output-csv "${out_csv}" \
           --translation "{{.CLI_ARGS| default .translation}}"
       - task: verify-nlp-tag
+      - task: diff
 
   verify-nlp-tag:
     cmds:
@@ -466,7 +479,7 @@ tasks:
               $Type == "NORP"       ? "Nationalities, religious or political groups" :
                                       "Other";
           ' \
-          then reorder -f Type,count,Explanation
+          then reorder -f Type,count,Explanation then sort -f Type
 
   trips:
     desc: view journesy in map                                     ... task travels
