@@ -322,6 +322,20 @@ def perform_entity_analysis(
     save_combined_results_to_csv(combined_results, output_csv_file)
 
 
+def get_context(doc, span_or_token, window=3):
+    """Get surrounding words for a token or span."""
+    if isinstance(span_or_token, spacy.tokens.Token):
+        start = max(0, span_or_token.i - window)
+        end = min(len(doc), span_or_token.i + window + 1)
+    elif isinstance(span_or_token, spacy.tokens.Span):
+        start = max(0, span_or_token.start - window)
+        end = min(len(doc), span_or_token.end + window)
+    else:
+        raise ValueError("Input must be a Token or Span.")
+
+    return " ".join([doc[i].text for i in range(start, end)])
+
+
 def save_combined_results_to_csv(data, output_csv_file):
     """Save entities, occupations, lifespans, relationships, and events to a CSV file."""
     with open(output_csv_file, "w", newline="", encoding="utf-8") as csv_file:
@@ -333,7 +347,7 @@ def save_combined_results_to_csv(data, output_csv_file):
             for chapter, verses in chapters.items():
                 for verse_num, results in verses.items():
                     # Save different result types
-                    save_entities(writer, book, chapter, verse_num, results["entities"])
+                    save_entities(writer, book, chapter, verse_num, results)
                     save_list(
                         writer,
                         book,
@@ -452,7 +466,11 @@ def tag_entities_and_lifespan(verse_text, book, chapter, verse_num):
 def initialize_results():
     """Initialize the results dictionary."""
     return {
-        "entities": {"PERSON": [], "DATE": [], "GPE": [], "ORG": [], "NORP": []},
+        "PERSON": [],
+        "DATE": [],
+        "GPE": [],
+        "ORG": [],
+        "NORP": [],
         "occupations": [],
         "lifespans": [],
         "relationships": [],
@@ -461,26 +479,31 @@ def initialize_results():
 
 
 def tag_named_entities(doc, results, unique_tags):
-    """Tag named entities from the document."""
+    """Tag named entities from the document, including context."""
     for ent in doc.ents:
-        if ent.label_ in results["entities"]:
+        if ent.label_ in results:  # Match against top-level keys
             entity_key = (ent.label_, ent.text.strip())
             if entity_key not in unique_tags:
-                results["entities"][ent.label_].append(ent.text.strip())
+                context = get_context(doc, ent)  # Pass the Span object to get_context
+                results[ent.label_].append(
+                    {"text": ent.text.strip(), "context": context}
+                )
                 unique_tags.add(entity_key)
 
 
 def tag_occupations(doc, results):
-    """Tag occupations from the document."""
+    """Tag occupations and include context."""
     results["occupations"] = [
-        token.lemma_ for token in doc if token.lemma_ in occupation_keywords
+        {"occupation": token.lemma_, "context": get_context(doc, token)}
+        for token in doc
+        if token.lemma_ in occupation_keywords
     ]
 
 
 def tag_lifespan_phrases(
     doc, verse_text, book, chapter, verse_num, results, unique_tags
 ):
-    """Detect lifespan phrases from the document."""
+    """Detect lifespan phrases and include context."""
     person, years = None, None
     for ent in doc.ents:
         if ent.label_ == "PERSON":
@@ -492,6 +515,7 @@ def tag_lifespan_phrases(
                 if confidence > LIFESPAN_CONFIDENCE_THRESHOLD:
                     lifespan_key = (person, years)
                     if lifespan_key not in unique_tags:
+                        context = get_context(doc, ent)
                         results["lifespans"].append(
                             {
                                 "Person": person,
@@ -502,6 +526,7 @@ def tag_lifespan_phrases(
                                         book, chapter, verse_num
                                     ),
                                     "Text": verse_text,
+                                    "Context": context,
                                 },
                             }
                         )
