@@ -221,9 +221,23 @@ tasks:
           --translation "{{.translation}}"
 
   diff:
+    silent: true
     cmds:
       - |
-        diff -ur data.old data
+        diff -qr data.old data > diff.log || true
+
+        while read -r line; do
+            # Extract filenames from diff output
+            old_file=$(echo "$line" | awk '{print $2}')
+            new_file=$(echo "$line" | awk '{print $4}')
+
+            # Print the filenames
+            echo "Diff for: $old_file vs $new_file"
+
+            # Extract the first 10 lines from each file and compare
+            diff --suppress-common-lines -b -W 200 -y <(head -n 20 "$old_file") <(head -n 20 "$new_file") || true
+            echo
+        done < <(grep "Files" diff.log)
 
   copy:
     cmds:
@@ -231,6 +245,7 @@ tasks:
         rsync -a --delete data/ data.old/
 
   nlp-tag:
+    silent: true
     aliases:
       - tag-entities
     desc: tag entities in a translation into 2 output files        ... task nlp-tag -- nwt
