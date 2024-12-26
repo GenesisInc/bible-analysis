@@ -94,29 +94,29 @@ then, you may run below commands to see the data.
 
         uv run main.py \
             tag-entities \
-            --input-file "data/input/nwt_bible.json" \
-            --output-json "data/output/nwt_entities.json" \
-            --output-csv "data/output/nwt_entities.csv" \
+            --input-file "data/nwt_bible.json" \
+            --output-json "data/nwt_entities.json" \
+            --output-csv "data/nwt_entities.csv" \
             --translation "nwt"
 
 - extract translations
 
         # extract asv
         uv run python3 main.py extract --translation "asv" \
-            --input-file data/input/multi_translation.json \
-            --output-file data/output/asv_bible.json
+            --input-file data/multi_translation.json \
+            --output-file data/asv_bible.json
 
 - get reference
 
         uv run python3 main.py reference \
-            --input-file data/input/nwt_bible.json \
+            --input-file data/nwt_bible.json \
             --translation nwt \
-            --reference "revelation 1:1-4
+            --reference "revelation 1:1-4"
 
 - search text
 
         uv run python3 main.py search --phrase 'word of god' \
-            --input-file "data/input/nwt_bible.json" \
+            --input-file "data/nwt_bible.json" \
             --top-n 5 --csv \
             --translation nwt
 
@@ -130,19 +130,28 @@ then, you may run below commands to see the data.
 
 ## usage - sample reports with tasks
 
-- legends
+- legends / summary
 
         ❯ task legends
-            +------------+-------+----------------------------------------------+
-            | Type       | count | Explanation                                  |
-            +------------+-------+----------------------------------------------+
-            | PERSON     | 17662 | Names of individuals                         |
-            | DATE       | 3432  | Explicit or implicit date expressions        |
-            | GPE        | 9478  | Geopolitical entities (places)               |
-            | ORG        | 4254  | Organizations or groups                      |
-            | OCCUPATION | 6273  | Roles or professions                         |
-            | NORP       | 1380  | Nationalities, religious or political groups |
-            +------------+-------+----------------------------------------------+
+        ❯ task summary
+            +------------+-------+------+---------------------------------------------+
+            | item       | total | uniq | exp                                         |
+            +------------+-------+------+---------------------------------------------+
+            | DATE       | 3356  | 707  | Explicit or implicit date expressions       |
+            | GPE        | 8946  | 1058 | Geopolitical entities (places)              |
+            | LIFESPAN   | 36    | 34   | Lifespan of persons                         |
+            | NORP       | 1325  | 241  | Nationalities religious or political groups |
+            | OCCUPATION | 5396  | 44   | Roles or professions                        |
+            | ORG        | 4136  | 1204 | Organizations or groups                     |
+            | PERSON     | 16326 | 1656 | Names of individuals                        |
+            +------------+-------+------+---------------------------------------------+
+
+This needs .env to read the values for below variables to connect to Psql db.
+
+    ❯ cat .env
+    # DB secrets
+    DB_NAME=example_db_name
+    DB_USER=example_db_user
 
 - names recorded in the bible
 

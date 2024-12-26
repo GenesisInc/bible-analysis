@@ -5,8 +5,14 @@ import unittest
 import pytest
 import spacy
 
-from core.nlp_tagger.lifespan_tagger import extract_context, tag_entities_from_verse
-from core.nlp_tagger.tagger import extract_reference, parse_reference
+from core.nlp_tagger.tagging_pipeline import (
+    extract_context,
+    tag_entities_from_verse,
+    extract_reference,
+    parse_reference,
+)
+
+# from core.nlp_tagger.tagger import extract_reference, parse_reference
 
 # Load spaCy's English NLP model for testing
 nlp = spacy.load("en_core_web_sm")

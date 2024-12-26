@@ -232,7 +232,7 @@ def setup_extract_parser(subparsers):
 def handle_command(args):
     """Handle the parsed command."""
     if args.command == "tag-entities":
-        logger.debug("Starting entity tagging for %s", args.input_file, exc_info=True)
+        logger.debug("Starting entity tagging for %s", args.input_file)
         tagging_pipeline.perform_entity_analysis(
             args.input_file,
             args.output_json,

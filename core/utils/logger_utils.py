@@ -29,7 +29,7 @@ def get_logger(logger_name):
         file_handler = logging.FileHandler(LOG_FILE)
         file_handler.setLevel(logging.DEBUG)  # Log all levels to file
         file_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
         )
         file_handler.setFormatter(file_formatter)
 

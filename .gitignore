@@ -7,10 +7,11 @@ __pycache__/
 *.csv
 *.html
 *.json
+*.log
 analysis/lifespans/results/
+data.old/
 data/bibles
 data/metadata
 data/tmp
 local/
 tmp
-*.log

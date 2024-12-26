@@ -20,7 +20,7 @@ def extract_translation(multi_translation_data, translation_name):
     """
     single_translation_data = {}
 
-    logger.debug("extracting '%s' from '%s", translation_name, multi_translation_data)
+    logger.debug("extracting '%s'", translation_name)
     for book, chapters in multi_translation_data.items():
         if book not in single_translation_data:
             single_translation_data[book] = {}
