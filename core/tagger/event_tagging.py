@@ -1,6 +1,6 @@
-# bible-analysis/core/nlp_tagger/event_tagging.py
+# bible-analysis/core/tagger/event_tagging.py
 
-""" bible-analysis/core/nlp_tagger/event_tagging.py"""
+""" bible-analysis/core/tagger/event_tagging.py"""
 
 from config.tagging_config import EVENT_KEYWORDS
 from core.utils.tagging_utils import get_context, initialize_results

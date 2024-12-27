@@ -6,12 +6,10 @@ import unittest
 import pytest
 import spacy
 
-from core.nlp_tagger.reference_extrator import (
+from core.tagger.reference_extrator import (
     extract_reference,
     parse_reference,
 )
-
-# from core.nlp_tagger.tagger import extract_reference, parse_reference
 
 # Load spaCy's English NLP model for testing
 nlp = spacy.load("en_core_web_sm")

@@ -1,6 +1,6 @@
-# bible-analysis/core/nlp_tagger/entity_tagging.py
+# bible-analysis/core/tagger/entity_tagging.py
 
-""" bible-analysis/core/nlp_tagger/entity_tagging.py"""
+""" bible-analysis/core/tagger/entity_tagging.py"""
 from core.utils.tagging_utils import get_context, initialize_results
 
 

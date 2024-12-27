@@ -1,6 +1,6 @@
-# bible-analysis/core/nlp_tagger/relationship_tagging.py
+# bible-analysis/core/tagger/relationship_tagging.py
 
-"""bible-analysis/core/nlp_tagger/relationship_tagging.py"""
+"""bible-analysis/core/tagger/relationship_tagging.py"""
 
 from core.utils.tagging_utils import get_context, initialize_results
 from config.tagging_config import RELATIONSHIP_KEYWORDS

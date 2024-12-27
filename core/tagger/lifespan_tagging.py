@@ -1,6 +1,6 @@
-# bible-analysis/core/nlp_tagger/lifespan_tagging.py
+# bible-analysis/core/tagger/lifespan_tagging.py
 
-"""bible-analysis/core/nlp_tagger/lifespan_tagging.py"""
+"""bible-analysis/core/tagger/lifespan_tagging.py"""
 
 import re
 

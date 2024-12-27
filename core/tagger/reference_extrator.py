@@ -1,4 +1,4 @@
-# bible-analysis/core/nlp_tagger/reference_extrator.py
+# bible-analysis/core/tagger/reference_extrator.py
 """entity analysis extract few entities from bible"""
 
 import json

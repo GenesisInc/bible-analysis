@@ -17,7 +17,7 @@
     │   ├── reference_utils.py
     │   └── tagging_config.py
     ├── core
-    │   ├── nlp_tagger
+    │   ├── tagger
     │   │   ├── __init__.py
     │   │   ├── bible_search.py
     │   │   ├── entity_tagging.py

@@ -6,12 +6,12 @@ import argparse
 import json
 
 from analysis.travel import mapper
-from core.nlp_tagger import bible_search, reference_extrator
-from core.nlp_tagger.entity_tagging import tag_named_entities
-from core.nlp_tagger.event_tagging import tag_events
-from core.nlp_tagger.lifespan_tagging import tag_lifespan_phrases
-from core.nlp_tagger.occupation_tagging import tag_occupations
-from core.nlp_tagger.relationship_tagging import tag_relationships
+from core.tagger import bible_search, reference_extrator
+from core.tagger.entity_tagging import tag_named_entities
+from core.tagger.event_tagging import tag_events
+from core.tagger.lifespan_tagging import tag_lifespan_phrases
+from core.tagger.occupation_tagging import tag_occupations
+from core.tagger.relationship_tagging import tag_relationships
 from core.translation_loader import translation_manager
 from core.utils import file_utils, tagging_utils
 from core.utils.logger_utils import get_logger

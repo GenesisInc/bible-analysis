@@ -1,6 +1,6 @@
-# bible-analysis/core/nlp_tagger/occupation_tagging.py
+# bible-analysis/core/tagger/occupation_tagging.py
 
-"""bible-analysis/core/nlp_tagger/occupation_tagging.py"""
+"""bible-analysis/core/tagger/occupation_tagging.py"""
 
 from core.utils.tagging_utils import get_context, initialize_results
 
