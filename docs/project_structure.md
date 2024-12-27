@@ -2,16 +2,28 @@
 
     .
     ├── analysis
-    │   ├── occupations
-    │   │   └── results
-    │   ├── science
-    │   │   ├── __init__.py
-    │   │   └── data_handler.py
-    │   ├── sentiments
-    │   │   └── results
-    │   └── travel
-    │       ├── __init__.py
-    │       └── mapper.py
+    │   └── science_facts
+    │       └── __init__.py
+    ├── cli
+    │   ├── __init__.py
+    │   ├── parsers.py
+    │   ├── parsers_extract.py
+    │   ├── parsers_reference.py
+    │   ├── parsers_science.py
+    │   ├── parsers_search.py
+    │   ├── parsers_tag_entities.py
+    │   └── parsers_travel.py
+    ├── commands
+    │   ├── __init__.py
+    │   ├── extract.py
+    │   ├── handle_command.py
+    │   ├── mapper.py
+    │   ├── reference.py
+    │   ├── science.py
+    │   ├── search.py
+    │   ├── tag_entities.py
+    │   ├── translation_manager.py
+    │   └── travel.py
     ├── config
     │   ├── book_order.py
     │   ├── reference_utils.py
@@ -27,67 +39,23 @@
     │   │   ├── reference_extrator.py
     │   │   └── relationship_tagging.py
     │   ├── translation_loader
-    │   │   ├── __init__.py
-    │   │   └── translation_manager.py
+    │   │   └── __init__.py
     │   ├── utils
     │   │   ├── __init__.py
     │   │   ├── file_utils.py
     │   │   ├── logger_utils.py
     │   │   ├── reference_utils.py
+    │   │   ├── science_facts_ctl.py
     │   │   ├── tagging_utils.py
     │   │   └── text_utils.py
-    │   └── visualization
-    │       └── visualization.py
+    │   └── visuals
+    │       └── visualizer.py
     ├── data
-    │   ├── Biblical_Travel_Details.csv
     │   ├── Enhanced_Biblical_Journeys_Map.html
-    │   ├── asv_bible.csv
-    │   ├── asv_bible.json
-    │   ├── bible_entities.csv
-    │   ├── bible_entities.json
     │   ├── charts.md
-    │   ├── kj21_bible.csv
-    │   ├── kj21_bible.json
-    │   ├── manual-report.csv
-    │   ├── multi_translation.json
-    │   ├── nwt_bible.csv
-    │   ├── nwt_bible.json
-    │   ├── nwt_entities.csv
-    │   ├── nwt_entities.json
-    │   ├── ojb_bible.json
-    │   ├── ojb_entities.csv
-    │   ├── ojb_entities.json
     │   ├── science
-    │   │   ├── charts.md
-    │   │   └── facts.json
+    │   │   └── charts.md
     │   ├── travel
-    │   │   └── journey_data.json
-    │   ├── travel.dot
-    │   └── travel.md
-    ├── data.old
-    │   ├── Biblical_Travel_Details.csv
-    │   ├── Enhanced_Biblical_Journeys_Map.html
-    │   ├── asv_bible.csv
-    │   ├── asv_bible.json
-    │   ├── bible_entities.csv
-    │   ├── bible_entities.json
-    │   ├── charts.md
-    │   ├── kj21_bible.csv
-    │   ├── kj21_bible.json
-    │   ├── manual-report.csv
-    │   ├── multi_translation.json
-    │   ├── nwt_bible.csv
-    │   ├── nwt_bible.json
-    │   ├── nwt_entities.csv
-    │   ├── nwt_entities.json
-    │   ├── ojb_bible.json
-    │   ├── ojb_entities.csv
-    │   ├── ojb_entities.json
-    │   ├── science
-    │   │   ├── charts.md
-    │   │   └── facts.json
-    │   ├── travel
-    │   │   └── journey_data.json
     │   ├── travel.dot
     │   └── travel.md
     ├── logs
@@ -98,4 +66,4 @@
     ├── test_main.py
     └── uv.lock
     
-    20 directories, 76 files
+    14 directories, 50 files

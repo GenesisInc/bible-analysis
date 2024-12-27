@@ -175,7 +175,8 @@ tasks:
       - |
         fd -HI . -tf  \
           --changed-within={{.duration}} \
-          --exclude=.git \
+          --exclude .ruff_cache \
+          --exclude .git \
           --exclude data.old \
           --exclude .pytest_cache \
           --exclude "*.log" \
@@ -198,7 +199,7 @@ tasks:
         printf "# project-structure\n\n"
         {
         tree  . \
-          -I bin -I local -I __pycache__ -I tmp -I docs \
+          -I bin -I local -I __pycache__ -I tmp -I docs -I data.old \
           -I *.csv -I *.json -I *.log -I *.md \
           -I go.sum -I go.mod
         } | sed 's/^/    /g'

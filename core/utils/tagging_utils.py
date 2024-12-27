@@ -1,6 +1,6 @@
 # bible-analysis/core/utils/tagging_utils.py
 
-"""bible-analysis/core/utils/tagging_utils.py"""
+"""helping utils for tagging."""
 
 import spacy
 
@@ -25,7 +25,7 @@ def get_context(doc, span_or_token, window=3):
 
 
 def calculate_confidence(sentence_text):
-    """Calculates confidence based on lifespan indicators and exclusion keywords."""
+    """Calculate confidence based on lifespan indicators and exclusion keywords."""
     indicator_matches = sum(
         1 for phrase in LIFESPAN_INDICATORS if phrase in sentence_text
     )
@@ -53,7 +53,7 @@ def initialize_results():
 
 
 def deduplicate_records(records):
-    """deduplicate_records"""
+    """deduplicate_records."""
     unique = set()
     deduplicated = []
     for record in records:

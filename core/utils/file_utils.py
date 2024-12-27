@@ -1,5 +1,5 @@
 # bible-analysis/core/utils/file_utils.py
-""" file utils"""
+"""file utils."""
 
 import csv
 import json
@@ -43,7 +43,7 @@ def sort_bible_data(bible_data):
 
 
 def save_to_csv(entities_and_occupations, output_csv_file):
-    """Saves entities and occupations data to a CSV file."""
+    """Save entities and occupations data to a CSV file."""
     with open(output_csv_file, "w", encoding="utf-8", newline="") as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow(["Book", "Chapter", "Verse", "Type", "Text"])
@@ -65,7 +65,7 @@ def save_to_csv(entities_and_occupations, output_csv_file):
 
 
 def save_combined_results_to_csv(data, output_csv_file):
-    """Save entities, occupations, lifespans, relationships, and events to a CSV file."""
+    """Save entities, occupations, lifespans, relationships & events to a CSV file."""
     with open(output_csv_file, "w", newline="", encoding="utf-8") as csv_file:
         csv_writer = csv.writer(csv_file)
         # Write header

@@ -1,6 +1,6 @@
 # bible-analysis/core/tagger/lifespan_tagging.py
 
-"""bible-analysis/core/tagger/lifespan_tagging.py"""
+"""bible-analysis/core/tagger/lifespan_tagging.py."""
 
 import re
 
@@ -42,6 +42,6 @@ def tag_lifespan_phrases(doc, verse_text, unique_tags) -> dict[str, list]:
 
 
 def extract_numeric_value(verse_text):
-    """Extracts a numeric value from verse_text if it’s purely numeric."""
+    """Extract a numeric value from verse_text if it’s purely numeric."""
     numeric_text = re.sub(r"[^\d]", "", verse_text)
     return int(numeric_text) if numeric_text.isdigit() else None

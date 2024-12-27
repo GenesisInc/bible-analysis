@@ -1,6 +1,6 @@
 # bible_analysis/config/tagging_config.py
 
-""" tagging config """
+"""tagging config."""
 
 # tagging_config.py
 

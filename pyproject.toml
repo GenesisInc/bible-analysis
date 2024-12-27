@@ -13,4 +13,5 @@ dependencies = [
     "regex>=2024.11.6",
     "folium>=0.19.2",
     "matplotlib>=3.10.0",
+    "ruff>=0.8.4",
 ]

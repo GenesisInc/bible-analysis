@@ -1,5 +1,5 @@
-# bible-analysis/analysis/travel/mapper.py
-"""mapper"""
+# bible-analysis/commands/mapper.py
+"""mapper."""
 
 import platform
 import subprocess
@@ -26,8 +26,8 @@ def map_travel(travel_file):
 
 
 def generate_enhanced_biblical_map_with_routes(data, file_path):
-    """
-    Generate an interactive map with enhanced features:
+    """Generate an interactive map with enhanced features.
+
     - Highlight source and destination on line click.
     - Associate journeys with location markers.
     - Include source and destination in line popups.
@@ -64,8 +64,7 @@ def generate_enhanced_biblical_map_with_routes(data, file_path):
 
 
 def process_location_data(data):
-    """
-    Extracts and organizes location data from journeys.
+    """Extract and organizes location data from journeys.
 
     Args:
     - data (list): List of journey dictionaries.
@@ -94,8 +93,7 @@ def process_location_data(data):
 
 
 def create_marker_layer(data, location_journeys, location_coordinates):
-    """
-    Creates a layer for markers with popups for source, destination, and top journeys.
+    """Create layer markers with popups for source, destination, and top journeys.
 
     Args:
     - data (list): List of journey dictionaries.
@@ -146,8 +144,7 @@ def create_marker_layer(data, location_journeys, location_coordinates):
 
 
 def create_route_layer(data):
-    """
-    Creates a layer for routes with polylines connecting source and destination.
+    """Create routes layer with polylines connecting source and destination.
 
     Args:
     - data (list): List of journey dictionaries.
@@ -173,8 +170,7 @@ def create_route_layer(data):
 
 
 def generate_marker_popup(location, journey, marker_type):
-    """
-    Generates a popup HTML string for a marker.
+    """Generate popup HTMLs for a marker.
 
     Args:
     - location (str): Location name.
@@ -196,8 +192,7 @@ def generate_marker_popup(location, journey, marker_type):
 
 
 def generate_route_popup(journey):
-    """
-    Generates a popup HTML string for a route.
+    """Generate popup HTML string for a route.
 
     Args:
     - journey (dict): Journey details.
@@ -219,8 +214,7 @@ def generate_route_popup(journey):
 
 
 def open_map(file_path):
-    """
-    Open the generated HTML map in Safari on macOS.
+    """Open the generated HTML map in Safari on macOS.
 
     Args:
     - file_path (str): The path to the HTML file.
