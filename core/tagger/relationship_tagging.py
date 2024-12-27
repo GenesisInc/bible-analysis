@@ -1,9 +1,9 @@
 # bible-analysis/core/tagger/relationship_tagging.py
 
-"""bible-analysis/core/tagger/relationship_tagging.py"""
+"""tag relationships."""
 
-from core.utils.tagging_utils import get_context, initialize_results
 from config.tagging_config import RELATIONSHIP_KEYWORDS
+from core.utils.tagging_utils import get_context, initialize_results
 
 
 def tag_relationships(doc, verse_text, unique_tags) -> dict[str, list]:

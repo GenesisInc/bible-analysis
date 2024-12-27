@@ -1,6 +1,7 @@
-# bible-analysis/core/tagger/bible_search.py
-""" search text / phrases in bible  """
+# bible-analysis/commands/search.py
+"""Command: search."""
 
+# from core.tagger.bible_search import find_matches
 import csv
 import json
 import re
@@ -17,22 +18,16 @@ def load_bible_data(bible_json_path):
         return json.load(file)
 
 
-def search_bible(bible_data, regex, translation="nwt"):
+def search_bible(args):
     """Search for matches in the Bible text using a regex."""
-    matches = []
-    logger.debug("searching for regex: '%s'", regex)
-    for book, chapters in bible_data[translation].items():
-        for chapter, verses in chapters.items():
-            for verse, text in verses.items():
-                if re.search(regex, text, re.IGNORECASE):  # Match based on regex
-                    matches.append(
-                        {
-                            "book": book,
-                            "chapter": chapter,
-                            "verse": verse,
-                            "text": text,
-                        }
-                    )
+    matches = find_matches(
+        args.input_file, args.phrase, args.translation, args.top_n, args.csv
+    )
+    if not args.csv:
+        for match in matches:
+            print(
+                f"{match['book']} {match['chapter']}:{match['verse']} - {match['text']}"
+            )
     return matches
 
 
@@ -65,7 +60,7 @@ def find_matches(
     regex = rf"{re.escape(phrase)}"  # Match substrings both single or multiple words
 
     # Search the Bible
-    matches = search_bible(bible_data, regex, translation)
+    matches = search_backend(bible_data, regex, translation)
 
     # Total matches
     total_matches = len(matches)
@@ -82,3 +77,22 @@ def find_matches(
         + f"matches from '{translation}' translation"
     )
     return sorted_matches
+
+
+def search_backend(bible_data, regex, translation="nwt"):
+    """Search for matches in the Bible text using a regex."""
+    matches = []
+    logger.debug("searching for regex: '%s'", regex)
+    for book, chapters in bible_data[translation].items():
+        for chapter, verses in chapters.items():
+            for verse, text in verses.items():
+                if re.search(regex, text, re.IGNORECASE):  # Match based on regex
+                    matches.append(
+                        {
+                            "book": book,
+                            "chapter": chapter,
+                            "verse": verse,
+                            "text": text,
+                        }
+                    )
+    return matches

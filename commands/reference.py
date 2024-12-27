@@ -1,5 +1,5 @@
-# bible-analysis/core/tagger/reference_extrator.py
-"""entity analysis extract few entities from bible"""
+# bible-analysis/commands/reference.py
+"""entity analysis extract few entities from bible."""
 
 import json
 
@@ -10,7 +10,7 @@ logger = get_logger(__file__.rsplit("/", 1)[-1])
 
 # called by main.py->Cmd.extract_reference
 def extract_reference(bible_json_path, reference, translation):
-    """Extracts text for a given Bible reference."""
+    """Extract bible-reference text."""
     with open(bible_json_path, "r", encoding="utf-8") as file:
         bible_data = json.load(file)
 
@@ -19,11 +19,10 @@ def extract_reference(bible_json_path, reference, translation):
 
 
 def parse_reference(reference):
-    """
-    Parses a Bible reference string into book, chapter, and verse details.
+    """Parse Bible reference-string into book, chapter, and verse details.
 
     Special cases:
-    - Single-chapter books (like Jude): Prefix "1:" to standalone verse numbers or ranges.
+    - Single-chapter books like Jude: Prefix "1:" to standalone verse numbers or ranges.
     """
     reference = reference.strip()
     if not reference:
@@ -56,7 +55,7 @@ def parse_reference(reference):
 
 
 def get_bible_text(reference, bible_data, translation):
-    """Extracts Bible text based on a reference string."""
+    """Extract Bible-reference text."""
     try:
         book, verses = parse_reference(reference)
         if not verses:
@@ -84,7 +83,7 @@ def get_bible_text(reference, bible_data, translation):
 def fetch_verses(
     bible_data, translation, book, start_chapter, start_verse, end_chapter, end_verse
 ):
-    """Fetches verses across chapter and verse ranges."""
+    """Fetch verses across chapter and verse ranges."""
     result = []
     for chapter in range(start_chapter, end_chapter + 1):
         chapter_key = str(chapter)
@@ -107,7 +106,7 @@ def fetch_verses(
 
 
 def fetch_entire_book(bible_data, book):
-    """Fetches all chapters and verses of a book."""
+    """Fetch entire book."""
     result = []
     book_data = bible_data["nwt"].get(book, {})
     for chapter_key in sorted(book_data.keys(), key=int):
@@ -118,7 +117,7 @@ def fetch_entire_book(bible_data, book):
 
 
 def parse_verse_range(verses):
-    """Parses a verse range into start and end chapter/verse."""
+    """Parse verse reference-range into start, end references."""
     if "-" in verses:
         start, end = verses.split("-")
         start_chapter, start_verse = map(int, start.split(":"))

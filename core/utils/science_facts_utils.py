@@ -1,5 +1,5 @@
-# bible-analysis/analysis/science/data_handler.py
-"""handle data"""
+# bible-analysis/core/utils/science_facts_utils.py
+"""handle data."""
 
 import json
 

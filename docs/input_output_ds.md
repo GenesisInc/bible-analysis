@@ -35,7 +35,7 @@
             }
         }
 
-2. ./data/input/nwt_bible.json
+2. ./data/nwt_bible.json
 
         {
             "nwt": {

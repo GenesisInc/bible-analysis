@@ -1,7 +1,5 @@
 # bible-analysis/core/utils/logger_utils.py
-""" logger """
-
-# bible-analysis/core/utils/logger_utils.py
+"""logger."""
 
 import logging
 import os
@@ -15,9 +13,7 @@ LOG_FILE = os.path.join(LOG_DIR, "bible_analysis.log")
 
 
 def get_logger(logger_name):
-    """
-    Returns a logger with the specified name.
-    """
+    """Return logger with the specified name."""
     # Create a logger
     logger = logging.getLogger(logger_name)
 
@@ -30,7 +26,7 @@ def get_logger(logger_name):
         file_handler = logging.FileHandler(LOG_FILE)
         file_handler.setLevel(logging.DEBUG)  # Log all levels to file
         file_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+            "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"  # noqa: E501
         )
         file_handler.setFormatter(file_formatter)
 

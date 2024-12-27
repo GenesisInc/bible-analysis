@@ -1,7 +1,6 @@
-# bible-analysis/core/translation_loader/translation_manager.py
-"""manipulator - merge & extract json"""
+# bible-analysis/commands/extract.py
 
-# bible-analysis/core/translation_loader/translation_manager.py
+"""logger."""
 
 from core.utils.logger_utils import get_logger
 
@@ -9,9 +8,7 @@ logger = get_logger(__file__.rsplit("/", 1)[-1])
 
 
 def extract_translation(multi_translation_data, translation_name):
-    """
-    Extracts a specific translation from the multi-translation
-        format to single-translation format.
+    """Extract a specific translation from the multi-translation file.
 
     Args:
         multi_translation_data (dict): Multi-translation JSON data.

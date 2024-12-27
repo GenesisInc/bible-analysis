@@ -1,10 +1,9 @@
 # bible-analysis/core/tagger/occupation_tagging.py
 
-"""bible-analysis/core/tagger/occupation_tagging.py"""
-
-from core.utils.tagging_utils import get_context, initialize_results
+"""tag occupations."""
 
 from config.tagging_config import occupation_keywords
+from core.utils.tagging_utils import get_context, initialize_results
 
 
 def tag_occupations(doc) -> dict[str, list]:

@@ -1,15 +1,12 @@
 # bible-analysis/test_main.py
-""" test bible module"""
+"""test bible module."""
 
 import unittest
 
 import pytest
 import spacy
 
-from core.tagger.reference_extrator import (
-    extract_reference,
-    parse_reference,
-)
+from commands.reference import extract_reference, parse_reference
 
 # Load spaCy's English NLP model for testing
 nlp = spacy.load("en_core_web_sm")
@@ -69,11 +66,11 @@ def test_parse_reference_edge_cases():
 
 
 def test_single_verse(mocker):
-    """test_single_verse"""
+    """test_single_verse."""
     mocker.patch(
         "builtins.open",
         mocker.mock_open(
-            read_data='{"nwt": {"genesis": {"1": {"1": "In the beginning God created the heavens and the earth."}}}}'
+            read_data='{"nwt": {"genesis": {"1": {"1": "In the beginning God created the heavens and the earth."}}}}'  # noqa: E501
         ),
     )
     ref = "Genesis 1:1"
@@ -82,8 +79,8 @@ def test_single_verse(mocker):
 
 
 def test_verse_range(mocker):
-    """test_verse_range"""
-    mock_data = '{"nwt": {"genesis": {"1": {"5": "God called the light Day.", "6": "And God said, Let there be a firmament.", "7": "God made the expanse and separated the waters."}}}}'
+    """test_verse_range."""
+    mock_data = '{"nwt": {"genesis": {"1": {"5": "God called the light Day.", "6": "And God said, Let there be a firmament.", "7": "God made the expanse and separated the waters."}}}}'  # noqa: E501
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_data))
     ref = "Genesis 1:5-7"
     result = extract_reference("path/to/bible.json", ref, "nwt")
@@ -91,8 +88,8 @@ def test_verse_range(mocker):
 
 
 def test_multiple_chapters(mocker):
-    """test_multiple_chapters"""
-    mock_data = '{"nwt": {"genesis": {"1": {"7": "God made the expanse.", "8": "God called the expanse Heaven."}, "2": {"1": "The heavens and the earth were completed.", "3": "God blessed the seventh day."}}}}'
+    """test_multiple_chapters."""
+    mock_data = '{"nwt": {"genesis": {"1": {"7": "God made the expanse.", "8": "God called the expanse Heaven."}, "2": {"1": "The heavens and the earth were completed.", "3": "God blessed the seventh day."}}}}'  # noqa: E501
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_data))
     ref = "Genesis 1:7-2:3"
     result = extract_reference("path/to/bible.json", ref, "nwt")
@@ -102,7 +99,7 @@ def test_multiple_chapters(mocker):
 
 
 def test_book_with_number(mocker):
-    """test_book_with_number"""
+    """test_book_with_number."""
     mock_data = '{"nwt": {"1 john": {"1": {"3": "That which we have seen and heard"}}}}'
     mocker.patch("builtins.open", mocker.mock_open(read_data=mock_data))
     ref = "1 John 1:3"
@@ -111,7 +108,7 @@ def test_book_with_number(mocker):
 
 
 def test_cross_chapter_single_verse(mocker):
-    """test_cross_chapter_single_verse"""
+    """test_cross_chapter_single_verse."""
     mock_data = (
         '{"nwt": {"1 samuel": {"3": {"2": "The lamp of God had not yet gone out."}}}}'
     )
@@ -122,7 +119,7 @@ def test_cross_chapter_single_verse(mocker):
 
 
 def test_invalid_reference(mocker):
-    """test_invalid_reference"""
+    """test_invalid_reference."""
     mocker.patch("builtins.open", mocker.mock_open(read_data="{}"))
     ref = "Invalid Reference"
     result = extract_reference("path/to/bible.json", ref, "nwt")
@@ -130,7 +127,7 @@ def test_invalid_reference(mocker):
 
 
 class TestMain(unittest.TestCase):
-    """test main module"""
+    """test main module."""
 
 
 if __name__ == "__main__":
