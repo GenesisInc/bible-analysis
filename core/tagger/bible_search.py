@@ -1,3 +1,4 @@
+# bible-analysis/core/tagger/bible_search.py
 """ search text / phrases in bible  """
 
 import csv
@@ -47,7 +48,8 @@ def write_csv_output(matches, total_matches, translation):
 
     # Print summary to stderr to separate it from CSV output
     print(
-        f"Showing top {len(matches)} of {total_matches} matches from '{translation}' translation",
+        f"Showing top {len(matches)} of {total_matches}"
+        + f" matches from '{translation}' translation",
         file=sys.stderr,
     )
 
@@ -60,7 +62,7 @@ def find_matches(
 
     # Normalize input and compile regex
     phrase = phrase.strip().lower()
-    regex = rf"{re.escape(phrase)}"  # Match substring, regardless of single or multiple words
+    regex = rf"{re.escape(phrase)}"  # Match substrings both single or multiple words
 
     # Search the Bible
     matches = search_bible(bible_data, regex, translation)
@@ -76,6 +78,7 @@ def find_matches(
         return None  # Explicitly return None for consistency
 
     print(
-        f"Showing top {len(sorted_matches)} of {total_matches} matches from '{translation}' translation"
+        f"Showing top {len(sorted_matches)} of {total_matches}"
+        + f"matches from '{translation}' translation"
     )
     return sorted_matches
