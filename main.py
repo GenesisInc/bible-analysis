@@ -1,3 +1,4 @@
+# bible-analysis/main.py
 """main"""
 
 # bible-analysis/main.py
@@ -5,9 +6,14 @@ import argparse
 import json
 
 from analysis.travel import mapper
-from core.nlp_tagger import bible_search, tagging_pipeline
+from core.nlp_tagger import bible_search, reference_extrator
+from core.nlp_tagger.entity_tagging import tag_named_entities
+from core.nlp_tagger.event_tagging import tag_events
+from core.nlp_tagger.lifespan_tagging import tag_lifespan_phrases
+from core.nlp_tagger.occupation_tagging import tag_occupations
+from core.nlp_tagger.relationship_tagging import tag_relationships
 from core.translation_loader import translation_manager
-from core.utils import file_utils
+from core.utils import file_utils, tagging_utils
 from core.utils.logger_utils import get_logger
 from core.visualization import visualization
 
@@ -229,11 +235,95 @@ def setup_extract_parser(subparsers):
     )
 
 
+def flatten_chapter_results(chapter_results, book, chapter_num):
+    """Flatten chapter results into a list of records."""
+    flat_results = []
+    for verse_num, results in chapter_results.items():
+        if not isinstance(results, dict):  # Debug unexpected data structure
+            raise ValueError(f"Expected results as a dict but got {type(results)}")
+        for result_type, items in results.items():
+            for item in items:
+                if not isinstance(item, dict):  # Debug unexpected data structure
+                    raise ValueError(
+                        f"Expected item as a dict but got {type(item)},\nitem: {item}"
+                    )
+
+                # pull out these and remove from item
+                trigger = item["trigger"]
+                context = item["context"]
+
+                # remove below to avoid duplicates in "extras"
+                del item["context"]
+                del item["trigger"]
+
+                flat_results.append(
+                    {
+                        "book": book,
+                        "chapter": chapter_num,
+                        "verse": verse_num,
+                        "type": result_type,
+                        "trigger": trigger,
+                        "context": context,
+                        "extras": item,
+                    }
+                )
+
+    return flat_results
+
+
+def perform_entity_analysis(input_file, output_json, output_csv, translation, books):
+    """Perform entity analysis using modular taggers."""
+    logger.debug("Loading Bible data from %s", input_file)
+    bible_data = file_utils.load_from_json(input_file)
+
+    combined_results = []
+    for book, chapters in bible_data[translation].items():
+        # skip current-book when it's not in requested books
+        if books and book not in books:
+            continue
+
+        for chapter_num, verses in chapters.items():
+            chapter_results = {}
+            for verse_num, verse_text in verses.items():
+                doc = tagging_utils.nlp(verse_text)  # Load NLP model once per verse
+
+                # Modular tagging
+                unique_tags = set()
+                chapter_results[str(verse_num)] = {}
+                chapter_results[str(verse_num)] = tag_named_entities(doc, unique_tags)
+                chapter_results[str(verse_num)]["occupations"] = tag_occupations(doc)
+
+                chapter_results[str(verse_num)]["lifespans"] = tag_lifespan_phrases(
+                    doc,
+                    verse_text,
+                    unique_tags,
+                )
+                chapter_results[str(verse_num)]["relationships"] = tag_relationships(
+                    doc, verse_text, unique_tags
+                )
+                chapter_results[str(verse_num)]["events"] = tag_events(doc)
+
+            # Flatten and deduplicate chapter results
+            flat_results = flatten_chapter_results(chapter_results, book, chapter_num)
+            deduplicated_results = tagging_utils.deduplicate_records(flat_results)
+
+            # Store deduplicated results back into combined_results
+            combined_results.extend(deduplicated_results)
+
+    # Save results
+    file_utils.save_to_json(combined_results, output_json)
+    file_utils.save_combined_results_to_csv(combined_results, output_csv)
+
+    logger.debug(
+        "Entity analysis completed. Results saved to %s and %s", output_json, output_csv
+    )
+
+
 def handle_command(args):
     """Handle the parsed command."""
     if args.command == "tag-entities":
         logger.debug("Starting entity tagging for %s", args.input_file)
-        tagging_pipeline.perform_entity_analysis(
+        perform_entity_analysis(
             args.input_file,
             args.output_json,
             args.output_csv,
@@ -242,6 +332,7 @@ def handle_command(args):
         )
     elif args.command == "search":
         logger.debug("Searching for phrase: '%s' in %s", args.phrase, args.input_file)
+
         matches = bible_search.find_matches(
             args.input_file,
             args.phrase,
@@ -257,9 +348,8 @@ def handle_command(args):
         logger.debug("Search completed.")
         if matches:
             logger.debug("Found %d matches.", len(matches))
-
     elif args.command == "reference":
-        result = tagging_pipeline.extract_reference(
+        result = reference_extrator.extract_reference(
             args.input_file, args.reference, args.translation
         )
         print(result)
@@ -278,7 +368,6 @@ def handle_command(args):
 
         print(f"Extracted {args.translation} translation saved to {args.output_file}")
     elif args.command == "science":
-        # Handle timeline generation and adding events
         events = file_utils.load_from_json(args.input_file)
         if args.add_event:
             new_event = {

@@ -11,8 +11,6 @@ vars:
   translations: asv kj21 nwt
   TMP_DIR:
     sh: mkdir -p "data/tmp" && echo "data/tmp"
-  # INPUT_DIR: "data"
-  # OUTPUT_DIR: "data"
   DATA_DIR: "data"
   entities_csv_file: "{{.DATA_DIR}}/{{.translation}}_entities.csv"
   entities_json_file: "{{.DATA_DIR}}/{{.translation}}_entities.json"
@@ -175,7 +173,13 @@ tasks:
       duration: '{{default "5m" .CLI_ARGS}}'
     cmds:
       - |
-        fd -HI . -tf  --changed-within={{.duration}} --exclude=.git
+        fd -HI . -tf  \
+          --changed-within={{.duration}} \
+          --exclude=.git \
+          --exclude data.old \
+          --exclude .pytest_cache \
+          --exclude "*.log" \
+          --exclude __pycache__
   test:
     cmds:
       - task changed_files -- 3m

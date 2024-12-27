@@ -1,9 +1,11 @@
+# bible-analysis/core/utils/file_utils.py
 """ file utils"""
 
 import csv
 import json
 
 from config.book_order import BOOK_ORDER
+from config.reference_utils import NONE_DICT_SYMBOL
 
 
 def save_to_json(data, output_file):
@@ -60,3 +62,21 @@ def save_to_csv(entities_and_occupations, output_csv_file):
                             [book, chapter, verse, "OCCUPATION", occupation]
                         )
     print(f"CSV results saved to {output_csv_file}")
+
+
+def save_combined_results_to_csv(data, output_csv_file):
+    """Save entities, occupations, lifespans, relationships, and events to a CSV file."""
+    with open(output_csv_file, "w", newline="", encoding="utf-8") as csv_file:
+        csv_writer = csv.writer(csv_file)
+        # Write header
+        csv_writer.writerow(
+            ["Book", "Chapter", "Verse", "Type", "Trigger", "Context", "Extras"]
+        )
+        for rec in data:
+            fields = []
+            for val in rec.values():
+                if isinstance(val, dict) and not val:
+                    fields.append(NONE_DICT_SYMBOL)
+                else:
+                    fields.append(val)
+            csv_writer.writerow(fields)
