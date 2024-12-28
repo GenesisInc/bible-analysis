@@ -3,4 +3,4 @@
 """text reference."""
 
 DEFAULT_KEYS = {"text": None, "context": None, "type": None}
-NONE_DICT_SYMBOL = "-"
+NONE_DICT_PLACEHOLDER = "-"
