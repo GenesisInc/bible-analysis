@@ -5,7 +5,7 @@ import csv
 import json
 
 from config.book_order import BOOK_ORDER
-from config.reference_utils import NONE_DICT_SYMBOL
+from config.reference_utils import NONE_DICT_PLACEHOLDER
 
 
 def save_to_json(data, output_file):
@@ -17,7 +17,7 @@ def save_to_json(data, output_file):
 
 def load_from_json(input_file):
     """Load data from a JSON file."""
-    with open(input_file, "r", encoding="utf-8") as f:
+    with open(input_file, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -76,7 +76,7 @@ def save_combined_results_to_csv(data, output_csv_file):
             fields = []
             for val in rec.values():
                 if isinstance(val, dict) and not val:
-                    fields.append(NONE_DICT_SYMBOL)
+                    fields.append(NONE_DICT_PLACEHOLDER)
                 else:
                     fields.append(val)
             csv_writer.writerow(fields)
