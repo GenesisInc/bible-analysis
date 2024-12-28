@@ -8,7 +8,7 @@ def setup_timeline_parser(subparsers):
     timeline_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/input/science/facts.json",
+        default="data/science/facts.json",
         help="Input CSV file for timeline data (default: %(default)s).",
     )
     timeline_parser.add_argument(

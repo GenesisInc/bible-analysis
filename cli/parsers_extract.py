@@ -8,7 +8,7 @@ def setup_extract_parser(subparsers):
     translation_parser.add_argument(
         "--input-file",
         type=str,
-        default="data/input/multi_translation.json",
+        default="data/multi_translation.json",
         help="Input JSON file for multi-translation Bible data (default: %(default)s).",
     )
     translation_parser.add_argument(
@@ -20,6 +20,6 @@ def setup_extract_parser(subparsers):
     translation_parser.add_argument(
         "--output-file",
         type=str,
-        default="data/output/extracted_translation.json",
+        default="data/extracted_translation.json",
         help="Output JSON file for extracted translation (default: %(default)s).",
     )

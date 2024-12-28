@@ -275,8 +275,7 @@ tasks:
           --input-file "${bible_file}" \
           --output-json "${out_json}" \
           --output-csv "${out_csv}" \
-          --translation "{{.CLI_ARGS| default .translation}}" \
-          --books "genesis"
+          --translation "{{.CLI_ARGS| default .translation}}"
       - task: verify-nlp-tag
       - task: diff
 
@@ -558,27 +557,17 @@ tasks:
       - task: out
 
   unique-occupation:
+    aliases:
+      - top-occupations
     silent: true
     desc: show roles or professions
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}} \
-          filter '$Type == "OCCUPATION"' \
-          then count-distinct -f Text \
-          then cut -x -f Extras \
-          then sort -f Text > {{.out}}
-      - task: out
-
-  top-occupations:
-    silent: true
-    desc: show roles or professions
-    cmds:
-      - |
-        mlr --csv --from {{.entities_csv_file}} \
-          filter '$Type == "OCCUPATION"' \
-          then count-distinct -f Text \
-          then cut -x -f Extras \
-          then sort -nf count then tail > {{.out}}
+        mlr --csv --from {{.entities_csv_file}}  \
+            filter '$Type == "OCCUPATION"' \
+            then cut -f Trigger \
+            then count-distinct -f Trigger \
+            then sort -nf count > {{.out}}
       - task: out
 
   relationship:
@@ -614,8 +603,8 @@ tasks:
         echo "top and bottom $(( {{.show_cnt}} / 2)) of sorted by occupation"
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "OCCUPATION"' \
-            then cut -f Text \
-            then count-distinct -f Text \
+            then cut -f Trigger \
+            then count-distinct -f Trigger \
             then label occupation,count \
             then cut -x -f Extras \
             then sort -f occupation > {{.out}}
@@ -625,8 +614,8 @@ tasks:
         printf "\n\n\ntop and bottom $(( {{.show_cnt}} / 2)) of sorted by count\n"
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "OCCUPATION"' \
-            then cut -f Text \
-            then count-distinct -f Text \
+            then cut -f Trigger \
+            then count-distinct -f Trigger \
             then label occupation,count \
             then cut -x -f Extras \
             then sort -nf count  > {{.out}}
@@ -657,18 +646,6 @@ tasks:
       - task: out
       - echo Legend.NORP - Nationalities Religions or Political Groups
 
-  date-summary:
-    silent: true
-    desc: show dates mentioned
-    cmds:
-      - |
-        mlr --csv --from {{.entities_csv_file}} \
-          filter '$Type == "DATE"' \
-            then cut -f Text \
-            then count-distinct -f Text \
-            then head > {{.out}}
-      - task: out
-
   names:
     vars:
       ex: task translation=ojb names
@@ -689,8 +666,8 @@ tasks:
       - |
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "PERSON"' \
-          then count-distinct -f Text \
-          then sort -f Text > {{.out}}
+          then count-distinct -f Trigger \
+          then sort -f Trigger > {{.out}}
       - task: out
 
   top-names:
@@ -700,7 +677,7 @@ tasks:
       - |
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "PERSON"' \
-          then count-distinct -f Text \
+          then count-distinct -f Trigger \
           then sort -nf count then tail > {{.out}}
       - task: out
 
