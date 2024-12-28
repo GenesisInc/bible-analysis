@@ -4,7 +4,7 @@
 from core.utils.text_utils import parse_year
 
 
-def generate_mermaid_charts(events, output_file="data/output/science/charts.md"):
+def generate_mermaid_charts(events, output_file="data/science/charts.md"):
     """Generate Mermaid.js Timeline and Gantt chart with Markdown headers."""
     with open(output_file, "w", encoding="utf-8") as file:
         # Write Timeline Header

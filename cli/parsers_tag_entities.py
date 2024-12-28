@@ -14,13 +14,13 @@ def setup_tag_entities_parser(subparsers):
     extract_parser.add_argument(
         "--output-json",
         type=str,
-        default="data/output/bible_entities.json",
+        default="data/bible_entities.json",
         help="Output JSON file for extracted entities (default: %(default)s).",
     )
     extract_parser.add_argument(
         "--output-csv",
         type=str,
-        default="data/output/bible_entities.csv",
+        default="data/bible_entities.csv",
         help="Output CSV file for extracted entities (default: %(default)s).",
     )
     extract_parser.add_argument(

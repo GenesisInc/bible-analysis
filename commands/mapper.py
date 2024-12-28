@@ -16,7 +16,7 @@ logger = get_logger(__file__.rsplit("/", 1)[-1])
 def map_travel(travel_file):
     """Generate and display the biblical journeys map."""
     logger.debug("mapping trip details from %s", travel_file)
-    updated_map_file_path = "data/output/Enhanced_Biblical_Journeys_Map.html"
+    updated_map_file_path = "data/Enhanced_Biblical_Journeys_Map.html"
     biblical_travel_data = file_utils.load_from_json(travel_file)
     generate_enhanced_biblical_map_with_routes(
         biblical_travel_data, updated_map_file_path
@@ -229,4 +229,4 @@ def open_map(file_path):
 
 
 if __name__ == "__main__":
-    map_travel("data/input/travel/journey_data.json")
+    map_travel("data/travel/journey_data.json")
