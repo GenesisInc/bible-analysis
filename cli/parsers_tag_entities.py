@@ -3,7 +3,7 @@ def setup_tag_entities_parser(subparsers):
     """Set up tag-entities parser."""
     extract_parser = subparsers.add_parser(
         "tag-entities",
-        help="Extract entities, occupations, and lifespans from Bible JSON data.",
+        help="Extract entities, occupations, lifespans and etc.",
     )
     extract_parser.add_argument(
         "--input-file",

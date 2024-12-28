@@ -10,10 +10,10 @@ def tag_occupations(doc) -> dict[str, list]:
     """Tag occupations and include context."""
     res = initialize_results()
 
-    res["occupations"] = [
+    res["OCCUPATION"] = [
         {"trigger": token.lemma_, "context": get_context(doc, token)}
         for token in doc
         if token.lemma_ in occupation_keywords
     ]
 
-    return res["occupations"]
+    return res["OCCUPATION"]

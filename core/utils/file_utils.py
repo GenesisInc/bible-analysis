@@ -57,7 +57,7 @@ def save_to_csv(entities_and_occupations, output_csv_file):
                                 [book, chapter, verse, entity_type, entity_text]
                             )
                     # Save occupations
-                    for occupation in data["occupations"]:
+                    for occupation in data["OCCUPATION"]:
                         writer.writerow(
                             [book, chapter, verse, "OCCUPATION", occupation]
                         )

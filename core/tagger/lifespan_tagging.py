@@ -28,7 +28,7 @@ def tag_lifespan_phrases(doc, verse_text, unique_tags) -> dict[str, list]:
                     lifespan_key = (person, years)
                     if lifespan_key not in unique_tags:
                         context = get_context(doc, ent)
-                        res["lifespans"].append(
+                        res["LIFESPAN"].append(
                             {
                                 "person": person,
                                 "explicit lifespan": years,
@@ -38,7 +38,7 @@ def tag_lifespan_phrases(doc, verse_text, unique_tags) -> dict[str, list]:
                             }
                         )
                         unique_tags.add(lifespan_key)
-    return res["lifespans"]
+    return res["LIFESPAN"]
 
 
 def extract_numeric_value(verse_text):

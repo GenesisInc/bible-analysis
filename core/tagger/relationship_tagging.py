@@ -16,11 +16,11 @@ def tag_relationships(doc, verse_text, unique_tags) -> dict[str, list]:
                 if ent.label_ == "PERSON":
                     relationship_key = f"RELATIONSHIP-{ent.text.strip()}"
                     if relationship_key not in unique_tags:
-                        res["relationships"].append(
+                        res["RELATIONSHIP"].append(
                             {
                                 "trigger": ent.text.strip(),
                                 "context": get_context(doc, ent),
                             }
                         )
                         unique_tags.add(relationship_key)
-    return res["relationships"]
+    return res["RELATIONSHIP"]

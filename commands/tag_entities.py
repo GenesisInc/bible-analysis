@@ -1,12 +1,12 @@
 # bible-analysis/commands/tag_entities.py
 """Command: tag-entities."""
 
-from core.utils import file_utils, tagging_utils
 from core.tagger.entity_tagging import tag_named_entities
+from core.tagger.event_tagging import tag_events
 from core.tagger.lifespan_tagging import tag_lifespan_phrases
 from core.tagger.occupation_tagging import tag_occupations
 from core.tagger.relationship_tagging import tag_relationships
-from core.tagger.event_tagging import tag_events
+from core.utils import file_utils, tagging_utils
 from core.utils.logger_utils import get_logger
 
 logger = get_logger(__name__)
@@ -21,16 +21,16 @@ def process_chapter(book, chapter_num, verses, translation):
         unique_tags = set()
         chapter_results[str(verse_num)] = {}
         chapter_results[str(verse_num)] = tag_named_entities(doc, unique_tags)
-        chapter_results[str(verse_num)]["occupations"] = tag_occupations(doc)
-        chapter_results[str(verse_num)]["lifespans"] = tag_lifespan_phrases(
+        chapter_results[str(verse_num)]["OCCUPATION"] = tag_occupations(doc)
+        chapter_results[str(verse_num)]["LIFESPAN"] = tag_lifespan_phrases(
             doc,
             verse_text,
             unique_tags,
         )
-        chapter_results[str(verse_num)]["relationships"] = tag_relationships(
+        chapter_results[str(verse_num)]["RELATIONSHIP"] = tag_relationships(
             doc, verse_text, unique_tags
         )
-        chapter_results[str(verse_num)]["events"] = tag_events(doc)
+        chapter_results[str(verse_num)]["EVENT"] = tag_events(doc)
 
     return chapter_results
 
