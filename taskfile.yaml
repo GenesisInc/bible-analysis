@@ -189,8 +189,13 @@ tasks:
       - task: convert_2_csv
       - task: extract
       - task ref-all -- genesis 1:1
-      - task: tag-entities
       - task changed_files -- 3m
+      - task: occupation
+
+  test-with-tag:
+    cmds:
+      - task: test
+      - task: tag-entities
 
   project-structure:
     desc: show project structure
@@ -270,7 +275,8 @@ tasks:
           --input-file "${bible_file}" \
           --output-json "${out_json}" \
           --output-csv "${out_csv}" \
-          --translation "{{.CLI_ARGS| default .translation}}"
+          --translation "{{.CLI_ARGS| default .translation}}" \
+          --books "genesis"
       - task: verify-nlp-tag
       - task: diff
 
@@ -520,18 +526,23 @@ tasks:
     silent: true
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}}  filter '$Type == "ORG"' > {{.out}}
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "ORG"' \
+          then cut -x -f Extras \
+          > {{.out}}
       - task: out
       - echo "Legend.ORG - Organization or groups"
 
   lifespan:
     vars:
-      ex: task translation=ojb lifespan
+      ex: task translation=ojb LIFESPAN
     desc: show lifespan of people                             ... {{.ex}}
     silent: true
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}}  filter '$Type == "LIFESPAN"' > {{.out}}
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "LIFESPAN"' \
+          > {{.out}}
       - task: out
       # - echo "Legend.ORG - Organization or groups"
 
@@ -540,7 +551,10 @@ tasks:
     desc: show roles or professions
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}} filter '$Type == "OCCUPATION"'  > {{.out}}
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "OCCUPATION"'  \
+          then cut -x -f Extras \
+          > {{.out}}
       - task: out
 
   unique-occupation:
@@ -551,6 +565,7 @@ tasks:
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "OCCUPATION"' \
           then count-distinct -f Text \
+          then cut -x -f Extras \
           then sort -f Text > {{.out}}
       - task: out
 
@@ -562,7 +577,30 @@ tasks:
         mlr --csv --from {{.entities_csv_file}} \
           filter '$Type == "OCCUPATION"' \
           then count-distinct -f Text \
+          then cut -x -f Extras \
           then sort -nf count then tail > {{.out}}
+      - task: out
+
+  relationship:
+    silent: true
+    desc: show relationships
+    cmds:
+      - |
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "RELATIONSHIP"' \
+          then cut -x -f Extras \
+          then sort -nf count > {{.out}}
+      - task: out
+
+  event:
+    silent: true
+    desc: show relationships
+    cmds:
+      - |
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "EVENT"' \
+          then cut -x -f Extras \
+          then sort -nf count > {{.out}}
       - task: out
 
   occupation-summary:
@@ -579,6 +617,7 @@ tasks:
             then cut -f Text \
             then count-distinct -f Text \
             then label occupation,count \
+            then cut -x -f Extras \
             then sort -f occupation > {{.out}}
       - task: out
       - |
@@ -589,6 +628,7 @@ tasks:
             then cut -f Text \
             then count-distinct -f Text \
             then label occupation,count \
+            then cut -x -f Extras \
             then sort -nf count  > {{.out}}
       - task: out
 
@@ -597,7 +637,11 @@ tasks:
     silent: true
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}} filter '$Type == "GPE"' > {{.out}}
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "GPE"' \
+          then cut -x -f Extras \
+          > {{.out}}
+
       - task: out
       - echo Legend.GPE - GeoPoliticalEntity
 
@@ -606,7 +650,10 @@ tasks:
     silent: true
     cmds:
       - |
-        mlr --csv --from {{.entities_csv_file}} filter '$Type == "NORP"' > {{.out}}
+        mlr --csv --from {{.entities_csv_file}} \
+          filter '$Type == "NORP"' \
+          then cut -x -f Extras \
+          > {{.out}}
       - task: out
       - echo Legend.NORP - Nationalities Religions or Political Groups
 
@@ -630,7 +677,9 @@ tasks:
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} \
-          filter '$Type == "PERSON"' > {{.out}}
+          filter '$Type == "PERSON"' \
+          then cut -x -f Extras \
+          > {{.out}}
       - task: out
 
   unique-names:
@@ -661,7 +710,9 @@ tasks:
     cmds:
       - |
         mlr --csv --from {{.entities_csv_file}} \
-          filter  '$Type == "DATE" && $Book == "daniel"' > {{.out}}
+          filter  '$Type == "DATE"' \
+          then cut -x -f Extras \
+          > {{.out}}
       - task: out
 
   out:
@@ -676,7 +727,7 @@ tasks:
         if [ "$total" -le {{.show_cnt}} ]; then
           # For fewer than or equal to {{.show_cnt}} records, display all
           echo "   Showing all $total records"
-          echo -e "   Translation: {{.YELLOW}}{{.translation}} {{.RESET}}"
+          echo -e "   Translation: {{.YELLOW}}{{.translation}}{{.RESET}}"
           cat "{{.out}}" | mlr --c2p --barred cat -n
         else
           # For more than {{.show_cnt}} records, show first ${btm} and last ${btm}

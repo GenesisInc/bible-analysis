@@ -12,10 +12,10 @@ def tag_events(doc) -> dict[str, list]:
 
     for token in doc:
         if token.text.lower() in EVENT_KEYWORDS:
-            res["events"].append(
+            res["EVENT"].append(
                 {
                     "trigger": token.text.lower().strip(),
                     "context": get_context(doc, token),
                 }
             )
-    return res["events"]
+    return res["EVENT"]

@@ -45,10 +45,10 @@ def initialize_results():
         "GPE": [],
         "ORG": [],
         "NORP": [],
-        "occupations": [],
-        "lifespans": [],
-        "relationships": [],
-        "events": [],
+        "OCCUPATION": [],
+        "LIFESPAN": [],
+        "RELATIONSHIP": [],
+        "EVENT": [],
     }
 
 
