@@ -1,5 +1,7 @@
 # project-structure
 
+updated by user: 'rt' on: 2024-12-28 16:22
+
     .
     ├── analysis
     │   └── science_facts
@@ -19,10 +21,8 @@
     │   ├── handle_command.py
     │   ├── mapper.py
     │   ├── reference.py
-    │   ├── science.py
     │   ├── search.py
-    │   ├── tag_entities.py
-    │   └── travel.py
+    │   └── tag_entities.py
     ├── config
     │   ├── book_order.py
     │   ├── reference_utils.py
@@ -39,7 +39,6 @@
     │   │   ├── __init__.py
     │   │   ├── file_utils.py
     │   │   ├── logger_utils.py
-    │   │   ├── reference_utils.py
     │   │   ├── science_facts_utils.py
     │   │   ├── tagging_utils.py
     │   │   └── text_utils.py
@@ -61,4 +60,4 @@
     ├── test_main.py
     └── uv.lock
     
-    13 directories, 46 files
+    13 directories, 43 files

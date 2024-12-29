@@ -1,6 +1,6 @@
 # to do
 
-Track below items as well
+List out below items to see 'does bible say anything about it?'
 
 1. [x] relationships (x son of Y)
 2. [x] [travel (x left Y, x enters/visited Y)][2]
