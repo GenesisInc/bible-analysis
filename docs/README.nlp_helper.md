@@ -1,10 +1,10 @@
-# extract names
+# Init project using uv
 
-    cd ${HOME}/orgs/robert.net/git/github.com/genesisinc/bible-text
+    cd ${HOME}/orgs/robert.net/git/github.com/genesisinc/bible-analysis
     ❯ brew install uv
 
     ❯ uv init
-        Initialized project `bible-text`
+        Initialized project `bible-analysis`
 
     ❯ uv add spacy
         Using CPython 3.12.6 interpreter at: /opt/homebrew/opt/python@3.12/bin/python3.12
@@ -23,11 +23,3 @@
         Successfully installed en-core-web-sm-3.8.0
         ✔ Download and installation successful
         You can now load the package via spacy.load('en_core_web_sm')
-
-    ❯ uv run nlp_helper.py
-        Extraction complete! Check 'person-names.list' and 'place-names.list' for results.
-
-    ❯ wc -l tmp/person-names.list tmp/place-names.list
-        683 tmp/person-names.list
-        397 tmp/place-names.list
-        1080 total
