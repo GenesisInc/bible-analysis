@@ -1,6 +1,6 @@
-# bible text - analysis & data science
+# bible analysis & data science
 
-A hobby project to analyse bible-text on PERSON, Dates, ORG, NPE, Occupations, NORP etc
+A hobby project to view & analyse PERSON, Dates, ORG, NPE, Occupations, NORP like entities mentioned in bible.
 
 ## Note
 
@@ -12,7 +12,7 @@ Here are few things you need to remember:
 - Expected accuracy is about 50-60%
 - Most of the reports are based on NWT 2013-English bible
 
-## graph flow
+## flow
 <!-- markdownlint-disable MD001 MD046 -->
 
 ```mermaid
@@ -41,37 +41,33 @@ mindmap
 
 ## requirements
 
-- [go-task/task](https://github.com/go-task/task)
-- [astral-sh/uv](https://github.com/astral-sh/uv)
-- [miller](https://github.com/johnkerl/miller)
-- [jqlang/jq](https://github.com/jqlang/jq) (optional)
-- [py-nlp-spacy-uv](./README.nlp_helper.md)
-- only for developers - [developer setup](./docs/README.nlp_helper.md)
+Please install below tools
+
+1. [go-task/task](https://github.com/go-task/task)
+2. [astral-sh/uv](https://github.com/astral-sh/uv)
+3. [miller](https://github.com/johnkerl/miller)
+4. [jqlang/jq](https://github.com/jqlang/jq) (optional)
+5. [py-nlp-spacy-uv](./README.nlp_helper.md)
+6. [developer setup](./docs/README.nlp_helper.md) - only for developers
 
 ## initial setup
 
-    git clone https://github.com/GenesisInc/bible-text.git
+1. download the input document from another project of ours.
 
-Update taskfile.yaml with the cloned path of bible-text
+        mkdir data
+        curl -o data/bible_entities.csv \
+            https://raw.githubusercontent.com/GenesisInc/bible-text/refs/heads/main/data/bible_entities.csv 
 
-Navigate to bible-analysis and run below command to link the data:
+2. clone bible-analysis repo & cd into it
 
-    task link-data
+        git clone https://github.com/GenesisInc/bible-analysis.git
+        cd bible-analysis (or wherever you cloned it)
 
---OR--
-Manually create those 2 links mentioned in the taslfile.yaml->link-data
-
-[bible-data][1] repo --provides file --> |nwt_bible.json|  
-
-    - nwt_bible.json file used by this project to do below
-        extract PERSON, ORG and etc and write to
-        data/tmp/bible_entities.csv
-
-then, you may run below commands to see the data.
+    then, you may run below usage, reports. Have fun :+1:
 
 ## usage - interact directly with python scripts
 
-- get help
+1. get help
 
         ❯ uv run main.py --help
         usage: main.py [-h] {tag-entities,search,reference,extract,trips,science} ...
@@ -90,7 +86,7 @@ then, you may run below commands to see the data.
             trips               view travels
             science             Generate timeline charts for scientific and biblical events.
 
-- tag-entities
+2. tag-entities
 
         uv run main.py \
             tag-entities \
@@ -99,38 +95,46 @@ then, you may run below commands to see the data.
             --output-csv "data/nwt_entities.csv" \
             --translation "nwt"
 
-- extract translations
+        data successfully written to data/nwt_entities.json
+        CSV results saved to bible_entities.csv
+
+    Now, you have bible_entities.json & bible_entities.csv.
+    You may try to query occupations, persons, orgs etc
+
+    NOTE: Please remember that these data generated programmatically and UNVERIFIED.
+
+3. extract translations
 
         # extract asv
         uv run python3 main.py extract --translation "asv" \
             --input-file data/multi_translation.json \
             --output-file data/asv_bible.json
 
-- get reference
+4. get reference
 
         uv run python3 main.py reference \
             --input-file data/nwt_bible.json \
             --translation nwt \
             --reference "revelation 1:1-4"
 
-- search text
+5. search text
 
         uv run python3 main.py search --phrase 'word of god' \
             --input-file "data/nwt_bible.json" \
             --top-n 5 --csv \
             --translation nwt
 
-- chart trips
+6. chart trips
 
         uv run main.py trips
 
-- science facts
+7. science facts
 
         uv run main.py science
 
 ## usage - sample reports with tasks
 
-- legends
+1. legends
 
         ❯ task legends
             +--------------+-------+----------------------------------------------+
@@ -147,9 +151,7 @@ then, you may run below commands to see the data.
             | RELATIONSHIP | 1011  | Other                                        |
             +--------------+-------+----------------------------------------------+
 
-This needs .env to read the values for below variables to connect to Psql db.
-
-- summary
+2. summary
 
         ❯ task summary
             +---------------+-------+------+---------------------------------------------+
@@ -166,12 +168,14 @@ This needs .env to read the values for below variables to connect to Psql db.
             | relationships | 1983  | 552  | Other                                       |
             +---------------+-------+------+---------------------------------------------+
 
-        ❯ cat .env
-        # DB secrets
-        DB_NAME=example_db_name
-        DB_USER=example_db_user
+    This needs .env to read the values for below variables to connect to Psql db.
 
-- names recorded in the bible
+        ❯ cat .env
+            # DB secrets
+            DB_NAME=example_db_name
+            DB_USER=example_db_user
+
+3. names recorded in the bible
 
         ❯ task names
             Summary:
@@ -199,7 +203,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 16 | revelation | 22      | 21    | PERSON | Jesus   | of the Lord Jesus be with the        |
             +----+------------+---------+-------+--------+---------+--------------------------------------+
 
-- distinct names
+4. distinct names
 
         ❯ task unique-names
             Summary:
@@ -227,7 +231,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 16 | the King of Israel    | 1     |
             +----+-----------------------+-------+
 
-- most frequent names
+5. most frequent names
 
         ❯ task top-names
             Summary:
@@ -249,7 +253,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 10 | Jehovah | 3846  |
             +----+---------+-------+
 
-- Organizations mentioned
+6. Organizations mentioned
 
         ❯ task org
             Summary:
@@ -278,7 +282,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             +----+------------+---------+-------+------+---------+---------------------------------------------+
             Legend.ORG - Organization or groups
 
-- Occupations
+7. Occupations
 
         ❯ task occupation
             Summary:
@@ -306,7 +310,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 16 | revelation | 22      | 9     | OCCUPATION | slave    | only a fellow slave of you and                 |
             +----+------------+---------+-------+------------+----------+------------------------------------------------+
 
-- occupation-summary
+8. occupation-summary
 
         ❯ task occupation-summary
             top and bottom 8 of sorted by occupation
@@ -361,7 +365,7 @@ This needs .env to read the values for below variables to connect to Psql db.
                 | 16 | king        | 1797  |
                 +----+-------------+-------+
 
-- most frequently mentioned occupations
+9. most frequently mentioned occupations
 
         ❯ task top-occupations
             ❯ task top-occupations
@@ -384,7 +388,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 10 | king     | 1797  |
             +----+----------+-------+
 
-- distinct occupations
+10. distinct occupations
 
         ❯ task unique-occupation
             mlr --csv --from data/nwt_entities.csv \
@@ -393,7 +397,7 @@ This needs .env to read the values for below variables to connect to Psql db.
                 then count-distinct -f Trigger \
                 then sort -nf count
 
-- Geo Political Entities(gpe)
+11. Geo Political Entities(gpe)
 
         ❯ task gpe
             Summary:
@@ -422,7 +426,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             +----+------------+---------+-------+------+----------------+----------------------------------------------+
             Legend.GPE - GeoPoliticalEntity
 
-- dates mentioned
+12. dates mentioned
 
         ❯ task date
             Summary:
@@ -450,7 +454,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | 16 | revelation | 22      | 2     | DATE | each month            | yielding their fruit each month . And the               |
             +----+------------+---------+-------+------+-----------------------+---------------------------------------------------------+
 
-- Nationalities Religions or Political Groups (norp)
+13. Nationalities Religions or Political Groups (norp)
 
         ❯ task norp
             Summary:
@@ -479,7 +483,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             +----+------------+---------+-------+------+-----------+--------------------------------------------+
             Legend.NORP - Nationalities Religions or Political Groups
 
-- search for words, numbers or phrases
+14. search for words, numbers or phrases
 
         1❯ task search -- jonathan
             Showing top 5 of 105 matches from 'nwt' translation
@@ -528,7 +532,7 @@ This needs .env to read the values for below variables to connect to Psql db.
             | isaiah    | 39      | 5     | Isaiah now said to Hezekiah: Hear the word of Jehovah of armies, |
             +-----------+---------+-------+------------------------------------------------------------------+
 
-- get bible text using references
+15. get bible text using references
 
         ❯ task ref -- genesis 1:1
             nwt  : In the beginning God created the heavens and the earth.
@@ -543,30 +547,9 @@ This needs .env to read the values for below variables to connect to Psql db.
             nwt  : The fragrance of your oils is pleasant. ... why the young women love you.
 
         ❯ task ref -- 2 john 2
-            nwt  : because of the truth that remains in us and will be with us forever.
+            nwt  : because of the truth that remains in us av
 
         ❯ task ref -- 2 john 1:2
             nwt  : because of the truth that remains in us and will be with us forever.
-
-## tag entities
-
-- tag entities
-
-        ❯ task tag-entities
-            uv run main.py \
-            tag-entities \
-            --input-file "${bible_file}" \
-            --output-json "${out_json}" \
-            --output-csv "${out_csv}" \
-            --translation "{{.CLI_ARGS| default .translation}}"
-
-        data successfully written to data/nwt_entities.json
-        CSV results saved to bible_entities.csv
-
-Now, you have bible_entities.json & bible_entities.csv.
-
-You may try to query occupations, persons, orgs etc
-
-NOTE: Please remember these data is generated programmatically and UNVERIFIED.
 
 [1]: https://github.com/GenesisInc/bible-text
