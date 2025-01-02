@@ -157,6 +157,13 @@ dotenv:
 tasks:
   default: task -a
 
+  slidev:
+    cmds:
+      - |
+        echo "slidev - https://github.com/slidevjs/slidev "
+        cd presentations
+        npm init slidev@latest
+
   changed_files:
     vars:
       duration: '{{default "5m" .CLI_ARGS}}'

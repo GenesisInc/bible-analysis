@@ -45,14 +45,14 @@ def handle_command(args):  # noqa: C901
     elif args.command == "trips":
         map_travel(args.input_file)
     elif args.command == "extract":
-        with open(args.input_file, "r", encoding="utf-8") as f:
+        with open(args.input_file) as f:
             multi_translation_data = json.load(f)
 
         single_translation_data = extract_translation(
             multi_translation_data, args.translation
         )
 
-        with open(args.output_file, "w", encoding="utf-8") as f:
+        with open(args.output_file, "w") as f:
             json.dump(single_translation_data, f, indent=4)
 
         print(f"Extracted {args.translation} translation saved to {args.output_file}")
@@ -71,7 +71,7 @@ def handle_command(args):  # noqa: C901
                 - parse_year(args.recorded_timeframe),
             }
             events.append(new_event)
-            with open(args.input_file, "w", encoding="utf-8") as file:
+            with open(args.input_file, "w") as file:
                 json.dump(events, file, indent=4)
             print(f"Added event: {new_event}")
         else:

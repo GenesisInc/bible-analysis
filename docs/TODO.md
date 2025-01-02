@@ -2,15 +2,15 @@
 
 List out below items to see 'does bible say anything about it?'
 
-1. [x] relationships (x son of Y)
+1. [x] relationships (x son of Y), geneology
 2. [x] [travel (x left Y, x enters/visited Y)][2]
 3. [x] actions, events
 4. [ ] gifting
 5. [ ] sale deeds (x bought Y for z amout)
 6. [ ] currencies (x used Y to buy z)
-7. [ ] items sold/bought/traded
-8. [ ] directions (north east - from where)
-9. [ ] intelligence
+7. [ ] trade - items sold/bought
+8. [ ] directions (north east - from x:lat/long)
+9. [ ] intelligence ( solomon, bezeliel, kamaliel)
 10. [x] [science (splitting of water into sea and cloud)][10]
 11. [ ] miracles (events can't proved by science yet)
 12. [ ] One of a kind event (merge with events?)
@@ -32,7 +32,7 @@ List out below items to see 'does bible say anything about it?'
 28. [x] occupations
 29. [ ] disobedience and judgements/punishments
 30. [ ] languages (starts, how , why)
-31. [ ] angels, demons interventions (Noah, Jesus's days)
+31. [ ] spirit realm - angels, demons interventions (Noah, Jesus's days)
 32. [ ] astrology
 33. [ ] fortune tellers
 34. [ ] magic
@@ -52,6 +52,11 @@ List out below items to see 'does bible say anything about it?'
 48. [ ] commandments with the timeframe introduced
 49. [ ] happy occations
 50. [ ] celebrations, dates and beliefs
+51. [ ] Money, banking, lending, borrowing, interest, tax (head tax)
+52. [ ] Fashion, dressing (ex: 28 - making dress for priests)
+53. [ ] Food (how to cook few foods, ex: 29)
+54. [ ] Offerings (sin, wave, burnt. ex: 29)
+55. [ ] Installation, sanctification of priests (ex: 29)
 
 [10]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/science-facts
 [2]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/travel-with-map
