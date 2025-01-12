@@ -10,7 +10,7 @@ List out below items to see 'does bible say anything about it?'
 6. [ ] currencies (x used Y to buy z)
 7. [ ] trade - items sold/bought
 8. [ ] directions (north east - from x:lat/long)
-9. [ ] intelligence ( solomon, bezeliel, kamaliel)
+9. [ ] intelligence (solomon, Bezalel, Oholiab(ex:31))
 10. [x] [science (splitting of water into sea and cloud)][10]
 11. [ ] miracles (events can't proved by science yet)
 12. [ ] One of a kind event (merge with events?)
@@ -54,9 +54,17 @@ List out below items to see 'does bible say anything about it?'
 50. [ ] celebrations, dates and beliefs
 51. [ ] Money, banking, lending, borrowing, interest, tax (head tax)
 52. [ ] Fashion, dressing (ex: 28 - making dress for priests)
-53. [ ] Food (how to cook few foods, ex: 29)
+53. [ ] Food, cooking (how to cook few foods, ex: 29, Lev 6:21)
 54. [ ] Offerings (sin, wave, burnt. ex: 29)
 55. [ ] Installation, sanctification of priests (ex: 29)
+56. [ ] Making incense (ex: 30)
+57. [ ] Tabernackle - instructions and items involced (ex:39)
+58. [ ] Metals used in Tabernackle, utencils made etc
+59. [ ] Priests garments, metals, thread used. Instructions to make it.
+60. [ ] Ark of the covenant (ex: 40)
+61. [ ] Most holy alter (ex: 40.10)
+62. [ ] Annointing priests(ex 40)
+63. [ ] Priest enter holy places (ex 40:31) Is any religion follows it today?
 
 [10]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/science-facts
 [2]: https://gitea.robert.net/genesisInc/bible-analysis/releases/tag/travel-with-map
